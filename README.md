@@ -1,2 +1,1 @@
-# self-supervised-methods
-Comparison between self-supervised methods
+# **Self Supervised Methods Comparison**
