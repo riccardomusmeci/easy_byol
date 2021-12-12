@@ -1,0 +1,4 @@
+torch==1.10
+torchvision==0.11.1
+albumentations==1.1.0
+matplotlib>=2.2
