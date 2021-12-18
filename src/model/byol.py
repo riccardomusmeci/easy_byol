@@ -45,7 +45,7 @@ class BYOL(nn.Module):
             params_f.requires_grad = False # no grad updates 
 
     @torch.no_grad()
-    def _update_target(self):
+    def update_target(self):
         """EMA update of the target network
         """
         for params_g, params_f in zip(self.g.parameters(), self.f.parameters()):
@@ -62,7 +62,7 @@ class BYOL(nn.Module):
         Returns:
             Tuple: (prediction_1, prediction_2), (target_1, target_2)
         """
-        pred1, pred2 = self.q(self.g(x1)), self.q(self.g(x2)) 
+        pred1, pred2 = self.q(self.g(x1)), self.q(self.g(x2))
         with torch.no_grad():
             targ1, targ2 = self.f(x1), self.f(x2)
         return (pred1, pred2), (targ1, targ2)

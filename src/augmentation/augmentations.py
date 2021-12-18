@@ -5,7 +5,7 @@ from torchvision import transforms as T
 
 def get_transform(
     mode: str, 
-    img_size: int, 
+    img_size: int=96, 
     mean: list = [0.485, 0.456, 0.406], 
     std: list = [0.229, 0.224, 0.225],
     brightness=0.8, 
