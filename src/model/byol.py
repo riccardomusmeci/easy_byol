@@ -53,7 +53,15 @@ class BYOL(nn.Module):
 
 
     def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> Tuple:
+        """Runs a forward pass for BYOL
 
+        Args:
+            x1 (torch.Tensor): first image view
+            x2 (torch.Tensor): second image view
+
+        Returns:
+            Tuple: (prediction_1, prediction_2), (target_1, target_2)
+        """
         pred1, pred2 = self.q(self.g(x1)), self.q(self.g(x2)) 
         with torch.no_grad():
             targ1, targ2 = self.f(x1), self.f(x2)

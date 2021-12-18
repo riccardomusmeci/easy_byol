@@ -72,6 +72,9 @@ class Encoder(nn.Module):
         # print(f"[_hook] Encoding output {self._encoded.shape}")
 
     def _register_hook(self):
+        """Registers hook for layer of interest
+        """
+        
         # getting layer of interest
         if isinstance(self.layer, str):
             layer = dict([*self.backbone.named_modules()])[self.layer]
