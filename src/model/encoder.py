@@ -46,6 +46,7 @@ class Encoder(nn.Module):
                 hidden_size=self.hidden_size,
                 projection_size=self.projection_size
             )
+        self._projector = self._projector.cuda() if torch.cuda.is_available() else self._projector
         return self._projector
 
 

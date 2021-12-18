@@ -30,9 +30,10 @@ def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period
         optimizer.zero_grad()
         # batch -> [imgs, labels]
         x, _ = batch
-        x.to(device)
+        x = x.to(device)
         with torch.no_grad():
             x1, x2 = transform(x), transform(x)
+            x1, x2 = x1.to(device), x2.to(device)
         # forward pass
         (pred_1, pred_2), (targ_1, targ_2) = model(x1, x2)
         loss = torch.mean(loss_fn(pred_1, targ_2) + loss_fn(pred_2, targ_1))
@@ -47,6 +48,8 @@ def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period
         if (idx+1)%log_period == 0:
             print(f"Batch {idx}/{len(loader)} - Loss: {loss.item()}")
 
+    del loader
+
 def val_epoch(loader, model, transform, loss_fn, device):
     """validation epoch
 
@@ -60,17 +63,20 @@ def val_epoch(loader, model, transform, loss_fn, device):
 
     model.eval()
     loss = 0
-    for idx, batch in tqdm(enumerate(loader), total=len(loader)):
-        x, _ = batch
-        x.to(device)
-        x1, x2 = transform(x), transform(x)
-        (pred_1, pred_2), (targ_1, targ_2) = model(x1, x2)
-        loss += torch.mean(loss_fn(pred_1, targ_2) + loss_fn(pred_2, targ_1))
-        if idx == 10:
-            break
-    
-    print(f"Val loss {loss/len(loader)}")
-    return loss/len(loader)
+    for _, batch in tqdm(enumerate(loader), total=len(loader)):
+        with torch.no_grad():
+            x, _ = batch
+            x = x.to(device)
+            x1, x2 = transform(x), transform(x)
+            x1, x2 = x1.to(device), x2.to(device)
+            (pred_1, pred_2), (targ_1, targ_2) = model(x1, x2)
+            loss += torch.mean(loss_fn(pred_1, targ_2) + loss_fn(pred_2, targ_1))
+        
+    avg_loss = loss/len(loader)
+    print(f"Val loss {avg_loss}")
+    del loader
+    return avg_loss
+
 
 def save_training_info(params: dict, output_dir: str):
     """prints training information
@@ -182,7 +188,8 @@ def train(args: argparse.Namespace):
                     mode="val",
                     img_size=params["transform"]["img_size"]
                 ),
-                loss_fn=loss_fn
+                loss_fn=loss_fn,
+                device=device
             )
             save_model(
                 model=byol,
