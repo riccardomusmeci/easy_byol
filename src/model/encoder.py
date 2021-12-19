@@ -47,6 +47,10 @@ class Encoder(nn.Module):
                 projection_size=self.projection_size
             )
         self._projector = self._projector.cuda() if torch.cuda.is_available() else self._projector
+        if not self.training:
+            self._projector.eval()
+        else:
+            self._projector.train()
         return self._projector
 
 
@@ -95,6 +99,7 @@ class Encoder(nn.Module):
         Returns:
             torch.Tensor: output encodings
         """
+       
         _ = self.backbone(x) # this calls the forward pass and calls the hook of the layer of interest; we do not need this output
         return self._encoded
 
