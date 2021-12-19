@@ -14,7 +14,9 @@ python train.py --model byol
 
 [ x ] Inference script
 
-[ ] Generalized loading dataset
+[ x ] Generalized loading dataset
+
+[ ] Generalized data loader based on chosen dataset
  
 [ ] Extracted features graphic visualization
 
