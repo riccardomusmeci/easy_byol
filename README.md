@@ -9,3 +9,22 @@ To run the training script:
 ```
 python train.py --model byol
 ```
+
+## **To-Do List**
+
+[ x ] Inference script
+
+[ ] Generalized loading dataset
+ 
+[ ] Extracted features graphic visualization
+
+[ ] Tensorboard integration
+
+[ ] GradCAM image visualization
+
+[ ] core/train+test as general as possible
+
+[ ] DINO
+
+
+

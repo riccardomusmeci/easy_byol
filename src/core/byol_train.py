@@ -5,8 +5,10 @@ import datetime
 from tqdm import tqdm
 from torch.optim import Adam
 from src.model.byol import BYOL
+from src.model.byol import Encoder
 from src.loss.loss import get_loss_fn
 from torch.utils.data import DataLoader
+from src.model.backbone import get_backbone
 from src.dataset.dataset import load_dataset
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
@@ -77,7 +79,6 @@ def val_epoch(loader, model, transform, loss_fn, device):
     del loader
     return avg_loss
 
-
 def save_training_info(params: dict, output_dir: str):
     """prints training information
 
@@ -128,6 +129,107 @@ def train(args: argparse.Namespace):
     
     # to cuda (if possivle)
     byol = byol.cuda() if torch.cuda.is_available() else byol
+
+    # loading datasets
+    train_dataset, val_dataset = load_dataset(name=params["dataset"])
+    
+    # getting data loaders
+    train_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=params["train"]["batch_size"],
+        shuffle=True,
+        drop_last=True
+    )
+    val_loader = DataLoader(
+        dataset=val_dataset,
+        batch_size=params["train"]["batch_size"]
+    )
+
+    # optimizer + scheduler + loss_fn
+    optimizer = get_optimizer(
+        model=byol,
+        **params["optimizer"]
+    )
+    scheduler_algo = params["scheduler"]["algo"]
+    scheduler = get_scheduler(
+        optimizer=optimizer,
+        scheduler=scheduler_algo,
+        **params["scheduler"][scheduler_algo]
+    )
+    loss_fn = get_loss_fn(loss=params["loss"]["type"])
+    epochs = params["train"]["epochs"]
+    
+    # printing and saving training information
+    save_training_info(params, output_dir)
+    
+    print(f"Starting training for {epochs} epochs")
+    for epoch in range(epochs):
+        print(f"Epoch {epoch}/{epochs}")
+        # epoch train
+        train_epoch(
+            loader=train_loader,
+            model=byol,
+            transform=get_transform(
+                mode="train",
+                **params["transform"]
+            ),
+            loss_fn=loss_fn,
+            optimizer=optimizer,
+            device=device,
+            log_period=5,
+        )
+        scheduler.step()
+        
+        # validation + checkpoint saving
+        if (epoch+1)%args.val_period or True:
+            val_loss = val_epoch(
+                loader=val_loader,
+                model=byol,
+                transform=get_transform(
+                    mode="val",
+                    img_size=params["transform"]["img_size"]
+                ),
+                loss_fn=loss_fn,
+                device=device
+            )
+            save_model(
+                model=byol.g.backbone, # backbone trained in self supervised manner with BYOL
+                model_dir=output_dir,
+                model_name=args.model + "_" + params["model"]["backbone"],
+                epoch=epoch,
+                loss=val_loss,
+            )
+            quit()
+
+def inference(args: argparse.Namespace):
+    """Performs BYOL test
+
+    Args:
+        args (argparse.Namespace): arguments
+    """
+
+    # getting device info
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print(f"Testing on {device}")
+
+    # loading params
+    params_path = os.path.join(args.hp_dir, args.model, "hp.yml")
+    params = load_params(path=params_path)
+    
+    # creating BYOL model
+    encoder = Encoder(backbone=params["model"]["backbone"])
+    model, _ = get_backbone(model=params["model"]["backbone"])
+    encoder.backbone.load_state_dict(torch.load(args.weights))
+    encoder.eval()
+    features = encoder(torch.rand(1, 3, 96, 96))
+    
+    # state_dict = model.state_dict()
+    # model = resnet18()
+    # model.load_state_dict(state_dict)
+
+    # to cuda (if possivle)
+    byol = byol.cuda() if torch.cuda.is_available() else byol
+    
 
     # loading datasets
     train_dataset, val_dataset = load_dataset(name=params["dataset"])
