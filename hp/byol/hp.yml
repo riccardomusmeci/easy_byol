@@ -1,6 +1,6 @@
 model_name: byol                              # model name
 
-dataset: Tennis                                # dataset to use among STL10, etc.
+dataset: STL10                                # dataset to use among STL10, etc.
 
 model:
   backbone: resnet18                          # model to use as feature extractor
