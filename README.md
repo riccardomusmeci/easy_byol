@@ -9,6 +9,9 @@ To run the training script:
 ```
 python train.py --model byol
 ```
+During training, encoder will be saved as pth file.
+
+
 
 ## **To-Do List**
 
@@ -19,6 +22,8 @@ python train.py --model byol
 [ ] Generalized data loader based on chosen dataset
  
 [ ] Extracted features graphic visualization
+
+[ ] ColorJitter and GaussianBlur transformations as nn.Module supporting randomness
 
 [ ] Tensorboard integration
 

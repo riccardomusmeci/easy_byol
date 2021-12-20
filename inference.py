@@ -44,8 +44,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.model == "byol":
-        from src.core.byol_inference import inference
-        inference(args)
+        from src.core.byol_extract_features import extract_features
+        extract_features(args)
 
     else:
         print(f"No implementation for {args.model}")
