@@ -24,17 +24,16 @@ def parse_args():
 
     parser.add_argument(
         "--weights",
-        default="checkpoints/byol/byol_2021-12-19-11-59-58/byol_resnet18_epoch_0_loss_0.0323.pth",
+        default="checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth",
         type=str,
         help="path to .pth file"
     )
 
     parser.add_argument(
-        "--gradcam",
-        type=lambda x: True if x.strip().lower() == "true" else False,
-        default=True,
-        metavar="N",
-        help="whether to apply gradcam."
+        "--output-dir",
+        default="output/",
+        type=str,
+        help="directory to save the features extracted by the BYOL encoder into"
     )
 
     return parser.parse_args()
@@ -44,8 +43,8 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.model == "byol":
-        from src.core.byol_extract_features import extract_features
-        extract_features(args)
+        from src.core.byol_inference import inference
+        inference(args)
 
     else:
         print(f"No implementation for {args.model}")

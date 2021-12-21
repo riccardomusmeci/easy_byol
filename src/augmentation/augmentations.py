@@ -41,8 +41,6 @@ def get_transform(
         T.Compose: composition of transformations.
     """
 
-
-
     if mode == "train":
         return T.Compose([
             T.Resize(size=img_size),

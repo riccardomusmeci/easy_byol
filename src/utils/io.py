@@ -1,9 +1,9 @@
 import os
-from torch.nn.parameter import Parameter
 import yaml
 import torch
-import torch.nn as nn
 import datetime 
+import numpy as np
+import torch.nn as nn
 from typing import Dict
 from src.model.backbone import get_backbone
 
@@ -49,3 +49,19 @@ def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, lo
     model_path = os.path.join(model_dir, filename)
     torch.save(model.state_dict(), model_path)
     print(f"Saved backbone at {filename}.")
+
+def save_numpy(np_data: np.array, folder: str, filename: str):
+    """saves numpy data by ensuring the "npy" ext
+
+    Args:
+        np_data (np.array): numpy data
+        folder (str): directory
+        filename (str): filename
+    """
+    os.makedirs(folder, exist_ok=True)
+    filename = filename if filename.endswith("npy") else filename.replace(".", "_") + ".npy"
+    filepath = os.path.join(folder, filename)
+    print(f"Saving numpy data at {filepath}")
+    with open(filepath, 'wb') as f:
+        np.save(f, np_data)
+    f.close()
