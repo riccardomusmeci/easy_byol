@@ -67,7 +67,6 @@ def load_STL10_categories(path: str = "data/stl10_binary/class_names.txt") -> li
 
     return categories
 
-
 def get_df(features: np.array, labels: np.array) -> pd.DataFrame:
     """Computes PCA on features
 
@@ -88,7 +87,7 @@ def get_df(features: np.array, labels: np.array) -> pd.DataFrame:
             "x": features[:, 0],
             "y": features[:, 1],
             "z": features[:, 2],
-            "label": labels,
+            "category": labels,
         }
     )
 
@@ -127,7 +126,7 @@ def render():
                 x="x", 
                 y="y", 
                 z="z", 
-                color="label",
+                color="category",
                 color_discrete_map = STL10_colormap()
             )
 

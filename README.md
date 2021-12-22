@@ -1,7 +1,6 @@
 # **Self Supervised Methods Comparison**
 
-## **BYOL**
-BYOL on STL10 Dataset. 
+## **BYOL - STL10 Dataset**
 
 To change training params, go to *hp/BYOL* folder and change yaml file. 
 
@@ -12,7 +11,7 @@ python train.py --model byol
 During training, encoder will be saved as pth file.
 
 
-To run the inference script and saving extracted features:
+To run the inference script and saving extracted features with TSNE:
 ```
 python inference.py --model byol
 ```
@@ -29,7 +28,7 @@ streamlit run visualization/webapp.py
 
 [ x ] Generalized loading dataset
 
-[ ] Extracted features graphic visualization
+[ x ] Extracted features graphic visualization
 
 [ ] Test Custom Random ColorJitter and GaussianBlur transformations 
 

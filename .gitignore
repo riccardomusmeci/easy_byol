@@ -133,9 +133,7 @@ dmypy.json
 *.pt
 
 # Dataset + Data
+output/
 data/
 checkpoints/
-output/
 
-# Data
-*.npy
