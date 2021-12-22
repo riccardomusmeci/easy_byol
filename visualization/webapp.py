@@ -91,7 +91,6 @@ def get_df(features: np.array, labels: np.array) -> pd.DataFrame:
         }
     )
 
-
 def render():
 
     setup_session()
@@ -113,14 +112,11 @@ def render():
         )
 
         with visualization_col:
-            
             st.markdown("<h2 style='text-align: center; color: black;'>TSNE Features</h2>", unsafe_allow_html=True)
-
             feat_distr = get_df(
                 features=features,
                 labels=labels
             )
-            
             fig = px.scatter_3d(
                 feat_distr, 
                 x="x", 

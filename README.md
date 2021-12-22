@@ -1,34 +1,42 @@
 # **Self Supervised Methods Comparison**
 
-## **BYOL - STL10 Dataset**
+## **Bootstrap Your Own Latent (BYOL) - PyTorch**
 
-To change training params, go to *hp/BYOL* folder and change yaml file. 
+<img src="static/byol_diagram.png" width="600px"></img>
 
-To run the training script:
+PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning based on <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a>.
+
+### **Usage**
+
+Set your training params in *hp/BYOL/hp.yml* file. Specifically you can change model backbone and training params (epochs, lr, scheduler, etc.). 
+
+Once your params are ready, run the training script:
+
 ```
 python train.py --model byol
 ```
 During training, encoder will be saved as pth file.
 
-
-To run the inference script and saving extracted features with TSNE:
+To extract features from STL10 validation dataset, run the inference script by specifying weights path:
 ```
-python inference.py --model byol
+python inference.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth
 ```
-During training, encoder will be saved as pth file.
+The inference script will save features, labels, and tsne_features in an output folder.
 
-To run visualization webapp with streamlit, run
+### **Feature Distribution Visualization**
+
+You can visualize TSNE features distribution with <a href="https://streamlit.io">streamlit</a>. To run the visualization webapp:
+
 ```
 streamlit run visualization/webapp.py
 ```
+You need to select the features folder and then the webapp will display the features distribution.
 
-## **To-Do List**
+<img src="static/streamlit_visualization.jpg" width="700px"></img>
 
-[ x ] Inference script
 
-[ x ] Generalized loading dataset
+### **To-Do List**
 
-[ x ] Extracted features graphic visualization
 
 [ ] Test Custom Random ColorJitter and GaussianBlur transformations 
 

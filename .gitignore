@@ -136,4 +136,5 @@ dmypy.json
 output/
 data/
 checkpoints/
+*.npy
 
