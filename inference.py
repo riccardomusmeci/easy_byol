@@ -36,6 +36,13 @@ def parse_args():
         help="directory to save the features extracted by the BYOL encoder into"
     )
 
+    parser.add_argument(
+        "--tsne",
+        default=True,
+        type=lambda x: True if x.lower() == "true" else False,
+        help="enable TSNE computation for easier visualization (may take a while)"
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":

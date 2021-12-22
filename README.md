@@ -12,6 +12,16 @@ python train.py --model byol
 During training, encoder will be saved as pth file.
 
 
+To run the inference script and saving extracted features:
+```
+python inference.py --model byol
+```
+During training, encoder will be saved as pth file.
+
+To run visualization webapp with streamlit, run
+```
+streamlit run visualization/webapp.py
+```
 
 ## **To-Do List**
 
@@ -19,11 +29,11 @@ During training, encoder will be saved as pth file.
 
 [ x ] Generalized loading dataset
 
-[ ] Generalized data loader based on chosen dataset
- 
 [ ] Extracted features graphic visualization
 
-[ ] ColorJitter and GaussianBlur transformations as nn.Module supporting randomness
+[ ] Test Custom Random ColorJitter and GaussianBlur transformations 
+
+[ ] Generalized data loader based on chosen dataset 
 
 [ ] Tensorboard integration
 

@@ -4,20 +4,21 @@ import datetime
 import argparse
 import numpy as np
 from tqdm import tqdm
+from sklearn.manifold import TSNE
 from src.model.byol import Encoder
 from src.utils.io import save_numpy
 from src.utils.io import load_params
 from torch.utils.data import DataLoader
-from src.gradcam.gradcam import GradCAM
 from src.dataset.dataset import load_dataset
 from src.augmentation.augmentations import get_transform
 
-def save_outputs(folder: str, features: np.array, labels: np.array):
+def save_outputs(folder: str, features: np.array, tsne_features: np.array, labels: np.array):
     """Save outputs from inference
 
     Args:
         folder (str): folder where saving features and labels
         features (np.array): features
+        tsne_features (np.array): TSNE features
         labels (np.array): labels
     """
     # matching output dir with weights name
@@ -28,6 +29,13 @@ def save_outputs(folder: str, features: np.array, labels: np.array):
         folder=folder,
         filename="features.npy"
     )
+
+    save_numpy(
+        np_data=tsne_features,
+        folder=folder,
+        filename="tsne_features.npy"
+    )
+
     save_numpy(
         np_data=labels, 
         folder=folder, 
@@ -82,9 +90,15 @@ def inference(args: argparse.Namespace):
     features = np.array(features)
     labels = np.array(labels)
 
+    if args.tsne:
+        print("Performing TSNE (this may take a while)")
+        tsne = TSNE(n_components=3)
+        tsne_features = tsne.fit_transform(X=features, y=labels)
+        
     save_outputs(
         folder=os.path.join(args.output_dir, args.weights.split("/")[-2]),
         features=features,
+        tsne_features=tsne_features if args.tsne else None,
         labels=labels
     )
             
