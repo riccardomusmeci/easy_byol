@@ -2,7 +2,9 @@
 
 ## **Bootstrap Your Own Latent (BYOL) - PyTorch**
 
-<img src="static/byol_diagram.png" width="600px"></img>
+<p align="center">
+    <img src="static/byol_diagram.png" width="600px"></img>
+</p>
 
 PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning based on <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a>.
 
@@ -30,9 +32,11 @@ You can visualize TSNE features distribution with <a href="https://streamlit.io"
 ```
 streamlit run visualization/webapp.py
 ```
-You need to select the features folder and then the webapp will display the features distribution.
+You need to select the features folder and then the webapp will display the features distribution. You can also interact with the 3D grapg (e.g. zooming in/ou, selecting categories to show, etc.)
 
-<img src="static/streamlit_visualization.jpg" width="700px"></img>
+<p align="center">
+    <img src="static/streamlit_visualization.jpg" width="700px"></img>
+</p>
 
 
 ### **To-Do List**
