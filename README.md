@@ -32,7 +32,7 @@ You can visualize TSNE features distribution with <a href="https://streamlit.io"
 ```
 streamlit run visualization/webapp.py
 ```
-You need to select the features folder and then the webapp will display the features distribution. You can also interact with the 3D grapg (e.g. zooming in/ou, selecting categories to show, etc.)
+You need to select the features folder and then the webapp will display the features distribution. You can also interact with the 3D graph (e.g. zooming in/ou, selecting categories to show, etc.)
 
 <p align="center">
     <img src="static/streamlit_visualization.jpg" width="700px"></img>
