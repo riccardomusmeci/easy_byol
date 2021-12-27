@@ -137,4 +137,4 @@ output/
 data/
 checkpoints/
 *.npy
-
+test.py

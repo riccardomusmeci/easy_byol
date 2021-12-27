@@ -1,6 +1,6 @@
 model_name: byol                              # model name
 
-dataset: STL10                                # dataset to use among STL10, etc.
+dataset: dogs                                 # dataset to use among STL10, dogs.
 
 model:
   backbone: resnet18                          # model to use as feature extractor
@@ -40,7 +40,3 @@ scheduler:
     T_max: 50
     eta_min: 0.00005
     verbose: true
-
-
-
-

@@ -56,6 +56,7 @@ def inference(args: argparse.Namespace):
     # loading params
     params_path = os.path.join(args.hp_dir, args.model, "hp.yml")
     params = load_params(path=params_path)
+    print(f"Inference on {params['dataset']} dataset.")
     
     # Getting encoder and setting to eval mode
     encoder = Encoder(backbone=params["model"]["backbone"])
@@ -63,7 +64,7 @@ def inference(args: argparse.Namespace):
     encoder.eval()
 
     # loading datasets
-    _, val_dataset = load_dataset(name=params["dataset"], mode="val")
+    _, val_dataset = load_dataset(name=params["dataset"], mode="val", img_size=params["transform"]["img_size"])
     
     # getting data loaders
     val_loader = DataLoader(
@@ -79,7 +80,7 @@ def inference(args: argparse.Namespace):
     features, labels = [], []
     for _, batch in tqdm(enumerate(val_loader), total=len(val_loader)):
         with torch.no_grad():
-            x, _labels = batch
+            x, _labels = batch[0], batch[1]
             x = transform(x)
             x = x.to(device)
             _features = encoder(x)

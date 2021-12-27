@@ -1,14 +1,11 @@
-import argparse
 import os
 import torch
-import datetime
+import argparse
 from tqdm import tqdm
-from torch.optim import Adam
 from src.model.byol import BYOL
-from src.model.byol import Encoder
 from src.loss.loss import get_loss_fn
 from torch.utils.data import DataLoader
-from src.model.backbone import get_backbone
+
 from src.dataset.dataset import load_dataset
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
@@ -30,8 +27,8 @@ def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period
     model.train()
     for idx, batch in enumerate(loader):
         optimizer.zero_grad()
-        # batch -> [imgs, labels]
-        x, _ = batch
+        # batch -> [imgs, labels] or batch -> [imgs, labels idxs, labels name]
+        x = batch[0]
         x = x.to(device)
         with torch.no_grad():
             x1, x2 = transform(x), transform(x)
@@ -67,7 +64,7 @@ def val_epoch(loader, model, transform, loss_fn, device):
     loss = 0
     for _, batch in tqdm(enumerate(loader), total=len(loader)):
         with torch.no_grad():
-            x, _ = batch
+            x = batch[0]
             x = x.to(device)
             x1, x2 = transform(x), transform(x)
             x1, x2 = x1.to(device), x2.to(device)
@@ -89,8 +86,10 @@ def save_training_info(params: dict, output_dir: str):
 
     os.makedirs(output_dir, exist_ok=True)
     with open(os.path.join(output_dir, "training_info.txt"), "w") as f:
+        f.write(f"Dataset: {params['dataset']}\n")
         f.write(f"Model: {params['model_name']}\n")
         f.write(f"Model Backbone: {params['model']['backbone']}\n")
+        f.write(f"Image Size: {params['transform']['img_size']}\n")
         f.write(f"Epochs: {params['train']['epochs']}\n")
         f.write(f"Optimizer Algorithm: {params['optimizer']['algo']}\n")
         f.write(f"Scheduler Algorithm: {params['scheduler']['algo']}\n")
@@ -98,8 +97,10 @@ def save_training_info(params: dict, output_dir: str):
     f.close()
 
     print("Training information:")
+    print(f"\t> Dataset: {params['dataset']}")
     print(f"\t> Model: {params['model_name']}")
     print(f"\t> Model Backbone: {params['model']['backbone']}")
+    print(f"\t> Image Size: {params['transform']['img_size']}")
     print(f"\t> Epochs: {params['train']['epochs']}")
     print(f"\t> Optimizer Algorithm: {params['optimizer']['algo']}")
     print(f"\t> Scheduler Algorithm: {params['scheduler']['algo']}")
@@ -131,7 +132,7 @@ def train(args: argparse.Namespace):
     byol = byol.cuda() if torch.cuda.is_available() else byol
 
     # loading datasets
-    train_dataset, val_dataset = load_dataset(name=params["dataset"])
+    train_dataset, val_dataset = load_dataset(name=params["dataset"], img_size=params["transform"]["img_size"])
     
     # getting data loaders
     train_loader = DataLoader(

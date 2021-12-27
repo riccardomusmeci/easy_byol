@@ -3,6 +3,7 @@ import yaml
 import torch
 import datetime 
 import numpy as np
+from PIL import Image
 import torch.nn as nn
 from typing import Dict
 from src.model.backbone import get_backbone
@@ -30,6 +31,25 @@ def load_params(path: str) -> Dict:
             print(exc)
             quit()
     return params
+
+def read_image(img_path: str) -> Image:
+    """Keeps reading image until succeed. This can avoid IOErrore incurred by heavy IO process.
+
+    Args:
+        img_path (str): path to imag
+
+    Raises:
+        IOError: IOError
+
+    Returns:
+        Image: PIL Image
+    """
+
+    if not os.path.exists(img_path):
+        raise IOError("{} does not exist".format(img_path))
+    img = Image.open(img_path)
+      
+    return img.convert('RGB')
 
 def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, loss: float):
     """Saves model in a dir

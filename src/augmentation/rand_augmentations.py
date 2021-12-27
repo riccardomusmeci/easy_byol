@@ -34,7 +34,7 @@ class RandomColorJitter():
             torch.Tensor: transformed images
         """
         for x in imgs:
-            if random.random() > self.p:
+            if random.random() < self.p:
                 x = self.T(x)
 
         return imgs
@@ -43,7 +43,7 @@ class RandomColorJitter():
 class RandomGaussianBlur():
 
     def __init__(self, kernel_size=(3, 3), sigma=(.1, 2), p=.1) -> None:
-        """Random Color Jitter Transformation
+        """Random Gaussian Blur Transformation
 
         Args:
             kernel (tuple, optional): gaussian jernel size. Defaults to (3, 3).
@@ -57,7 +57,7 @@ class RandomGaussianBlur():
         self.p=p
 
     def __call__(self, imgs: torch.Tensor) -> torch.Tensor:
-        """Call to RandomColorJitter
+        """Call to Random Gaussian Blur
 
         Args:
             imgs (torch.Tensor): images to transform
@@ -66,7 +66,7 @@ class RandomGaussianBlur():
             torch.Tensor: transformed images
         """
         for x in imgs:
-            if random.random() > self.p:
+            if random.random() < self.p:
                 x = self.T(x)
 
         return imgs

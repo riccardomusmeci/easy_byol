@@ -6,7 +6,7 @@ def parse_args():
     Returns:
         argparse.Namespace: arguments
     """
-    parser = ArgumentParser("Self-Supervised-Learning training script.")
+    parser = ArgumentParser("Self-Supervised-Learning inference script.")
     parser = ArgumentParser()
 
     parser.add_argument(
@@ -24,7 +24,6 @@ def parse_args():
 
     parser.add_argument(
         "--weights",
-        default="checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth",
         type=str,
         help="path to .pth file"
     )
