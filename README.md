@@ -8,6 +8,13 @@
 
 PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning based on either  <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a> or <a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>.
 
+### **Dogs Dataset**
+
+* Download dataset from kaggle (<a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>)
+* Create a *data/dogs* folder structure in the project directory
+* Put train, test, and list_breeds.csv into data/dogs directory
+
+
 ### **Usage**
 
 Set your training params in *hp/BYOL/hp.yml* file. You can change dataset (STL10/dogs), model backbone and training params (epochs, lr, scheduler, etc.). 
