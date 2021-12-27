@@ -2,8 +2,8 @@ import torch
 from typing import Tuple
 from torchvision.datasets import STL10
 from src.dataset.dogs import DogsDataset
+from torchvision.transforms import ToTensor
 from torch.utils.data.dataset import Dataset
-from torchvision.transforms import Compose, ToTensor, Resize
 
 def load_dataset(name: str, mode: str = "train", **kwargs) -> Dataset:
     """Loads dataset
@@ -42,7 +42,7 @@ def dogs_dataset(mode: str = "train", img_size: int = 224) -> Tuple[Dataset, Dat
         train_dataset = DogsDataset(
             root="data/dogs", 
             split="train",
-            transform=Compose([ToTensor(), Resize(img_size)])
+            transform=ToTensor()
         )
     else:
         train_dataset = None
@@ -50,7 +50,7 @@ def dogs_dataset(mode: str = "train", img_size: int = 224) -> Tuple[Dataset, Dat
     val_dataset = DogsDataset(
         root="data/dogs", 
         split="val",
-        transform=Compose([ToTensor(), Resize(img_size)])
+        transform=ToTensor()
     )
 
     return train_dataset, val_dataset

@@ -13,7 +13,21 @@ PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> me
 * Download dataset from kaggle (<a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>)
 * Create a *data/dogs* folder structure in the project directory
 * Put train, test, and list_breeds.csv into data/dogs directory
+* Resize all dataset images in a square format (e.g. 96x96) to speed up the training process
 
+You can use the following code in a custom script:
+```
+import os
+from tqdm import tqdm
+from PIL import Image
+from glob2 import glob
+
+data_path = "data/dogs"
+files = [f for f in glob(os.path.join(data_path, "*", "*.jpg"))]
+for fpath in tqdm(files, total=len(files)):
+    im = Image.open(fpath).resize(size=(96, 96))
+    im.save(fpath)
+```
 
 ### **Usage**
 
