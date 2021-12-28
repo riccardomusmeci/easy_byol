@@ -4,6 +4,9 @@ import pandas as pd
 import streamlit as st
 from typing import Tuple
 import plotly.express as px
+from glob2 import glob
+from PIL import Image
+from scipy.spatial.distance import cdist as dist
 
 OUTPUT_FOLDER = "output"
 CHECKPOINT_FOLDER = "checkpoints/byol"
@@ -128,6 +131,89 @@ def setup_session():
     if 'folder' not in st.session_state:
         st.session_state.folder = "None"
 
+def get_idxs(features: np.array, n: int = 5) -> list:
+    """Gets random samples to show (one anchor and closest samples)
+
+    Args:
+        features (np.array): features
+        n (int, optional): how many samples to show
+
+    Returns:
+        list: list of indices
+    """
+    index = np.random.choice(features.shape[0]) 
+    rand_sample = features[index]
+    dist_mat = dist([rand_sample], features)
+    idxs = dist_mat.argsort()[0][:n+1]
+    return idxs
+
+def get_labels(dataset: str, idxs: str) -> list:
+    """Get labels for given images beloging to a specific dataset
+
+    Args:
+        dataset (str): dataset name
+        idxs (str): subset of images
+
+    Returns:
+        list: labels
+    """
+    if dataset == "dogs":
+        labels_df = pd.read_csv("data/dogs/list_breeds.csv", sep=";")
+        id2name = {
+            row["Id"]: row["Breed"].replace("_", " ").capitalize() for _, row in labels_df.iterrows()
+        }
+        imgs = [ f.split(os.sep)[-1] for f in glob("data/dogs/test/*.jpg")]
+        labels = []
+        for idx in idxs:
+            _id = imgs[idx].split("_")[0]
+            labels.append(id2name[_id])
+        return labels
+
+    if dataset == "STL10":
+        with open("data/stl10_binary/class_names.txt", "r") as f:
+            class_names = f.read().split("\n")
+        id2name = {
+            str(i+1): class_names[i] for i in range(len(class_names))
+        }
+        imgs = [ f.split(os.sep)[-1] for f in glob("data/stl10_test/test/*.png")]
+        labels = []
+        for idx in idxs:
+            _id = imgs[idx].split(".")[0].split("_")[-1]
+            labels.append(id2name[_id])
+        return labels
+
+def get_imgs_to_show(dataset: str, features: np.array):
+    """Gets random samples to show (anchor + closest samples)
+
+    Args:
+        dataset (str): dataset name
+        features (np.array): features
+
+    Returns:
+        Tuple: anchor, closest_samples_img, labels
+    """
+    if dataset == "dogs":
+        data_path = "data/dogs/test/*.jpg"
+    if dataset == "STL10":
+        data_path = "data/stl10_test/test/*.png"
+
+    img_paths = [f for f in glob(data_path)]
+    idxs = get_idxs(features=features)
+    ### Random Sample 
+    anchor_img = Image.open(img_paths[idxs[0]])
+    ### Concatenating Closest samples
+    images = [Image.open(img_paths[idx]).resize((224, 224)) for idx in idxs[1:]]
+    widths, heights = zip(*(i.size for i in images))
+
+    total_width, max_height= sum(widths), max(heights)
+    closest_samples_img = Image.new('RGB', (total_width, max_height))
+    x_offset = 0
+    for im in images:
+        closest_samples_img.paste(im, (x_offset,0))
+        x_offset += im.size[0]
+    
+    return anchor_img, closest_samples_img, get_labels(dataset=dataset, idxs=idxs)
+
 def render():
 
     setup_session()
@@ -150,7 +236,8 @@ def render():
         )
 
         with visualization_col:
-            st.markdown(f"<h2 style='text-align: center; color: black;'>{dataset.upper()} Features</h2>", unsafe_allow_html=True)
+            _dataset = "Unsupervised Dogs" if dataset == "dogs" else dataset
+            st.markdown(f"<h2 style='text-align: center; color: black;'>{_dataset} Features</h2>", unsafe_allow_html=True)
             feat_distr = get_df(
                 dataset=dataset,
                 features=features,
@@ -166,5 +253,18 @@ def render():
             )
 
             st.write(fig)
-        
+
+        if option_col.button('View Random Samples'):
+            visualization_col.markdown(f"<h2 style='text-align: center; color: black;'>Random Sample - Closest Images</h2>", unsafe_allow_html=True)
+            
+            anchor, closest_samples, labels = get_imgs_to_show(dataset=dataset, features=features)
+            visualization_col.markdown(f"<h3 style='text-align: left; color: black;'><br>Random Sample ({labels[0]})</h3>", unsafe_allow_html=True)
+            visualization_col.image(anchor, width=224)
+
+            ### Concatenating Closest samples
+            labels_str = " - ".join(labels[1:])
+            visualization_col.markdown(f"<h3 style='text-align: left; color: black;'><br>Closest Samples ({labels_str})</h3>", unsafe_allow_html=True)
+            visualization_col.image(closest_samples, width=closest_samples.size[0])
+                
+
 render()
