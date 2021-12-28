@@ -21,5 +21,6 @@ def get_optimizer(model: nn.Module, algo: str = "adam", lr: float = 1e-4, weight
         )
     else:
         print("Only adam is implemented as optimizer. Quitting.")
+        quit()
 
 

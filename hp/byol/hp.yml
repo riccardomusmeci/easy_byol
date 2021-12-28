@@ -3,7 +3,7 @@ model_name: byol                              # model name
 dataset: dogs                                 # dataset to use among STL10, dogs.
 
 model:
-  backbone: resnet18                          # model to use as feature extractor
+  backbone: resnet50                          # model to use as feature extractor
   hidden_size: 4096                           # MLP predictor hidden units
   projection_size: 256                        # MLP output size
 
