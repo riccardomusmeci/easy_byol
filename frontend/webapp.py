@@ -103,14 +103,14 @@ def get_df(dataset: str, features: np.array, labels: np.array) -> pd.DataFrame:
     print(f"Getting data for dataset {dataset}")
     categories = load_categories(dataset)
 
-    labels = [ categories[idx] for idx in labels ]
+    labels = [ categories[idx].replace("_", " ").lower() for idx in labels ]
 
     return pd.DataFrame(
         data = {
             "x": features[:, 0],
             "y": features[:, 1],
             "z": features[:, 2],
-            "category": labels,
+            "category": labels
         }
     )
 
@@ -202,7 +202,7 @@ def get_imgs_to_show(dataset: str, features: np.array):
     ### Random Sample 
     anchor_img = Image.open(img_paths[idxs[0]])
     ### Concatenating Closest samples
-    images = [Image.open(img_paths[idx]).resize((224, 224)) for idx in idxs[1:]]
+    images = [Image.open(img_paths[idx]).resize((128, 128)) for idx in idxs[1:]]
     widths, heights = zip(*(i.size for i in images))
 
     total_width, max_height= sum(widths), max(heights)
@@ -217,11 +217,11 @@ def get_imgs_to_show(dataset: str, features: np.array):
 def render():
 
     setup_session()
-    st.title("Self Supervised Methods - Features Distribution Visualization")
+    st.title("Self Supervised Methods")
 
     folders = os.listdir(OUTPUT_FOLDER)
-    option_col, _, visualization_col = st.columns([2, 3, 10])
-    option = option_col.selectbox(
+    features_col, _, images_col = st.columns([6, 3, 4])
+    option = features_col.selectbox(
         'Which output folder you want to analyze?',
         ["None"] + folders, 
     )
@@ -235,9 +235,9 @@ def render():
             tsne=True
         )
 
-        with visualization_col:
+        with features_col:
             _dataset = "Unsupervised Dogs" if dataset == "dogs" else dataset
-            st.markdown(f"<h2 style='text-align: center; color: black;'>{_dataset} Features</h2>", unsafe_allow_html=True)
+            features_col.markdown(f"<h3 style='text-align: center; color: black;'>{_dataset} Features</h3>", unsafe_allow_html=True)
             feat_distr = get_df(
                 dataset=dataset,
                 features=features,
@@ -252,19 +252,19 @@ def render():
                 color_discrete_map = get_colormap(dataset=dataset)
             )
 
-            st.write(fig)
-
-        if option_col.button('View Random Samples'):
-            visualization_col.markdown(f"<h2 style='text-align: center; color: black;'>Random Sample - Closest Images</h2>", unsafe_allow_html=True)
+            features_col.write(fig)
+        images_col.markdown("Click on this button to view some samples",  unsafe_allow_html=True)
+        if images_col.button('View Random Samples'):
+            images_col.markdown(f"<h3 style='text-align: center; color: black;'>Random Sample - Closest Images</h3>", unsafe_allow_html=True)
             
             anchor, closest_samples, labels = get_imgs_to_show(dataset=dataset, features=features)
-            visualization_col.markdown(f"<h3 style='text-align: left; color: black;'><br>Random Sample ({labels[0]})</h3>", unsafe_allow_html=True)
-            visualization_col.image(anchor, width=224)
+            images_col.markdown(f"<h4 style='text-align: left; color: black;'><br>Random Sample ({labels[0]})</h4>", unsafe_allow_html=True)
+            images_col.image(anchor, width=128)
 
             ### Concatenating Closest samples
             labels_str = " - ".join(labels[1:])
-            visualization_col.markdown(f"<h3 style='text-align: left; color: black;'><br>Closest Samples ({labels_str})</h3>", unsafe_allow_html=True)
-            visualization_col.image(closest_samples, width=closest_samples.size[0])
+            images_col.markdown(f"<h4 style='text-align: left; color: black;'><br>Closest Samples ({labels_str})</h4>", unsafe_allow_html=True)
+            images_col.image(closest_samples, width=closest_samples.size[0])
                 
 
 render()
