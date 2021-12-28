@@ -63,7 +63,7 @@ You need to select the features folder and then the webapp will display the feat
 By clicking on "View Random Samples" button the webapp will show a sample and the closest 5 images based on the features extracted by the model.
 
 <p align="center">
-    <img src="static/streamlit_visualization.jpg" width="700px"></img>
+    <img src="static/streamlit.jpg" width="700px"></img>
 </p>
 
 
