@@ -1,6 +1,6 @@
 model_name: byol                              # model name
 
-dataset: dogs                                 # dataset to use among STL10, dogs.
+dataset: STL10                                # dataset to use among STL10, dogs.
 
 model:
   backbone: resnet50                          # model to use as feature extractor

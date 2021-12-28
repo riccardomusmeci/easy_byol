@@ -42,10 +42,12 @@ python train.py --model byol
 ```
 During training, encoder will be saved as pth file.
 
-To extract features from your validation dataset, run the inference script by specifying weights path:
+To extract features from your validation dataset, run the inference script by specifying weights path.:
 ```
 python inference.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth
 ```
+Be sure to have the correct dataset name into the hp.yml file.
+
 The inference script will save features, labels, and tsne_features in an output folder.
 
 ### **WebApp Visualization**
