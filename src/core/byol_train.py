@@ -179,7 +179,6 @@ def train(args: argparse.Namespace):
             device=device,
             log_period=5,
         )
-        scheduler.step()
         
         # validation + checkpoint saving
         if (epoch+1)%args.val_period or True:
@@ -201,3 +200,5 @@ def train(args: argparse.Namespace):
                 loss=val_loss,
             )
         
+
+        scheduler.step()

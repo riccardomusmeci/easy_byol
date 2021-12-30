@@ -143,7 +143,7 @@ def get_idxs(features: np.array, n: int = 5) -> list:
     """
     index = np.random.choice(features.shape[0]) 
     rand_sample = features[index]
-    dist_mat = dist([rand_sample], features)
+    dist_mat = dist([rand_sample], features, metric="cosine")
     idxs = dist_mat.argsort()[0][:n+1]
     return idxs
 

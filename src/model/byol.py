@@ -6,7 +6,7 @@ from src.model.encoder import Encoder
 
 class BYOL(nn.Module):
 
-    def __init__(self, backbone: str, hidden_size: int = 4096, projection_size: int = 256, beta: float = 0.999) -> None:
+    def __init__(self, backbone: str, hidden_size: int = 4096, projection_size: int = 256, beta: float = 0.996) -> None:
         super().__init__()
 
         # defining encoder + predictor

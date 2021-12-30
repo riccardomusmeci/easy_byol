@@ -6,6 +6,7 @@ model:
   backbone: resnet50                          # model to use as feature extractor
   hidden_size: 4096                           # MLP predictor hidden units
   projection_size: 256                        # MLP output size
+  beta: 0.996                                 # EMA param to update target weights
 
 train:
   epochs: 50                                  # training epochs
@@ -13,11 +14,11 @@ train:
   
 optimizer:
   algo: adam                                  # optimization algorithm
-  lr: 0.0001                                  # learning rate
-  weight_decay: 0.0000001                     # weight decay                     
+  lr: 0.2                                     # learning rate
+  weight_decay: 1.5e-6                        # weight decay                     
 
 loss:
-  type: norm_mse                              # loss 
+  type: norm_mse                              # loss type
 
 transform: 
   img_size: 96                                # input image size
@@ -31,12 +32,17 @@ transform:
   grayscale_p: 0.2                            # grayscale transformation probabilty
   h_flip_p: 0.5                               # horizontal flip transformation probabilty
   kernel: [3, 3]                              # gaussian blur kernel size
-  sigma: [.1, 2]                             # gaussian blur params
+  sigma: [.1, 2]                              # gaussian blur params
   gaussian_blur_p: 0.1                        # gaussian blur transformation probability
 
 scheduler:
-  algo: cosine
-  cosine:
+  algo: linear                                # scheduler algorithm    
+  cosine:                                     # cosine params
     T_max: 50
     eta_min: 0.00005
+    verbose: true
+  linear:                                     # linear params
+    start_factor: 0.8                         # linear scaling factor at each iter
+    end_factor: 1.0                           # the number we multiply learning rate at the end of linear changing process
+    total_iters: 10                           # number of epochs for applying linear lr scherduling
     verbose: true
