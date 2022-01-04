@@ -9,11 +9,12 @@ from src.model.backbone import get_backbone
 
 class Encoder(nn.Module):
 
-    def __init__(self, backbone: str = "resnet50", hidden_size: int = 4096, projection_size: int = 256) -> None:
+    def __init__(self, backbone: str = "resnet50", pretrained: bool = True, hidden_size: int = 4096, projection_size: int = 256) -> None:
         """Encoder init
 
         Args:
             backbone (str, optional): which model to use as backbone. Defaults to "resnet50".
+            pretrained (bool, optional): pretrained weights. Defaults to True.
             hidden_size (int, optional): mlp hidden size. Defaults to 4096.
             projection_size (int, optional): mlp projection size. Defaults to 256.
         """
@@ -21,7 +22,10 @@ class Encoder(nn.Module):
         super().__init__()
         
         # Backbone fields
-        self.backbone, self.layer = get_backbone(model=backbone)
+        self.backbone, self.layer = get_backbone(
+            model=backbone,
+            pretrained=pretrained
+        )
         
         # Projector fields
         self.projection_size = projection_size
