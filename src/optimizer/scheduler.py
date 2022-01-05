@@ -1,5 +1,5 @@
 from torch.optim import Optimizer
-from torch.optim.lr_scheduler import CosineAnnealingLR, _LRScheduler
+from torch.optim.lr_scheduler import CosineAnnealingLR, _LRScheduler, LinearLR
 
 def get_scheduler(optimizer: Optimizer, scheduler: str, **kwargs) -> _LRScheduler:
     """returns lr scheduler
@@ -17,6 +17,13 @@ def get_scheduler(optimizer: Optimizer, scheduler: str, **kwargs) -> _LRSchedule
             optimizer=optimizer,
             **kwargs
         )
+
+    if scheduler == "linear":
+        return LinearLR(
+            optimizer=optimizer,
+            **kwargs
+        )
+        
     else:
         print("No other scheduler implemented")
         quit()

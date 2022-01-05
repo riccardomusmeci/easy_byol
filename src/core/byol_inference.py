@@ -54,7 +54,7 @@ def inference(args: argparse.Namespace):
     print(f"Testing on {device}")
 
     # loading params
-    params_path = os.path.join(args.hp_dir, args.model, "hp.yml")
+    params_path = os.path.join(args.params)
     params = load_params(path=params_path)
     print(f"Inference on {params['dataset']} dataset.")
     

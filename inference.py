@@ -16,16 +16,15 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--hp-dir",
-        type=str,
-        default="hp",
-        help="Dir containing hp.yml for each model. Default to hp."
-    )
-
-    parser.add_argument(
         "--weights",
         type=str,
         help="path to .pth file"
+    )
+
+    parser.add_argument(
+        "--params",
+        type=str,
+        help="path to hp.yml file"
     )
 
     parser.add_argument(

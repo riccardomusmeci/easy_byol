@@ -6,13 +6,14 @@ from src.model.encoder import Encoder
 
 class BYOL(nn.Module):
 
-    def __init__(self, backbone: str, hidden_size: int = 4096, projection_size: int = 256, beta: float = 0.999) -> None:
+    def __init__(self, backbone: str, pretrained: bool = True,  hidden_size: int = 4096, projection_size: int = 256, beta: float = 0.996) -> None:
         super().__init__()
 
         # defining encoder + predictor
         # g_theta in the paper
         self.g = Encoder(
             backbone=backbone,
+            pretrained=pretrained,
             hidden_size=hidden_size,
             projection_size=projection_size
         )
@@ -26,6 +27,7 @@ class BYOL(nn.Module):
         # f_eps in the paper
         self.f = Encoder(
             backbone=backbone,
+            pretrained=pretrained,
             hidden_size=hidden_size,
             projection_size=projection_size
         )

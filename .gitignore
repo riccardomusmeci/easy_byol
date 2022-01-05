@@ -138,3 +138,6 @@ data/
 checkpoints/
 *.npy
 test.py
+
+# useless vscode
+.vscode

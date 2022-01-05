@@ -14,6 +14,20 @@ def now():
     STRFTIME_FORMAT = "%Y-%m-%d-%H-%M-%S"
     return datetime.datetime.now().strftime(STRFTIME_FORMAT)
 
+def save_params(params: dict, yaml_path: str):
+    """Saves dict into yaml file
+
+    Args:
+        params (dict): params dict
+        path (str): path
+    """
+    with open(yaml_path, 'w') as f:
+        try:
+            yaml.safe_dump(params, f)
+        except yaml.YAMLError as exc:
+            print(exc)
+            quit()
+        
 def load_params(path: str) -> Dict:
     """Loads YAML file
 
