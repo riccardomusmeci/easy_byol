@@ -102,13 +102,13 @@ def cifar10_dataset(mode: str = "train") -> Tuple[Dataset, Dataset]:
     Returns:
         Tuple[Dataset, Dataset]: train + val dataset. If mode==val, train is None
     """
-    transform = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    # transform = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
     if mode == "train":
         train_dataset = CIFAR10(
             root="data",
             train=True,
             download=True,
-            transform=transform
+            transform=ToTensor()
         )
     else:
         train_dataset = None
@@ -117,7 +117,7 @@ def cifar10_dataset(mode: str = "train") -> Tuple[Dataset, Dataset]:
         root='data', 
         train=False,
         download=True, 
-        transform=transform
+        transform=ToTensor()
     )
     
     return train_dataset, val_dataset
