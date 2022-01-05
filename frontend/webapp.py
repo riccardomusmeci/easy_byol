@@ -71,6 +71,20 @@ def get_colormap(dataset: str) -> dict:
             "Siberian_husky": "mistyrose"
         }
 
+    if dataset == "CIFAR10":
+        return {
+            "plane": "blue", 
+            "car": "green", 
+            "bird": "red", 
+            "cat": "gray", 
+            "deer": "black", 
+            "dog": "orange",
+            "frog": "lime",
+            "horse": "gold",
+            "ship": "brown",
+            "truck": "pink"
+        }
+
 def load_categories(dataset: str) -> list:
     """loads categories for a dataset
     Args:
@@ -146,7 +160,7 @@ def get_idxs(features: np.array, n: int = 5) -> list:
     """
     index = np.random.choice(features.shape[0]) 
     rand_sample = features[index]
-    dist_mat = dist([rand_sample], features, metric="cosine")
+    dist_mat = dist([rand_sample], features, metric="euclidean")
     idxs = dist_mat.argsort()[0][:n+1]
     return idxs
 

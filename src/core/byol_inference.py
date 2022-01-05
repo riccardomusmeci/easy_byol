@@ -97,7 +97,7 @@ def inference(args: argparse.Namespace):
         tsne_features = tsne.fit_transform(X=features, y=labels)
         
     save_outputs(
-        folder=os.path.join(args.output_dir, args.weights.split("/")[-2]),
+        folder=os.path.join(args.output_dir, args.weights.split(os.sep)[-2]),
         features=features,
         tsne_features=tsne_features if args.tsne else None,
         labels=labels
