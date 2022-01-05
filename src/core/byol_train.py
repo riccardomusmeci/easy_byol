@@ -9,8 +9,8 @@ from torch.utils.data import DataLoader
 from src.dataset.dataset import load_dataset
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
-from src.utils.io import load_params, save_model, now
 from src.augmentation.augmentations import get_transform
+from src.utils.io import load_params, save_model, now, save_params
 
 def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period = 10):
     """training epoch
@@ -83,8 +83,12 @@ def save_training_info(params: dict, output_dir: str):
         params (dict): training params
         output_dir (str): where to save training ingo
     """
-
     os.makedirs(output_dir, exist_ok=True)
+    print(f"Saving training information (txt recap + hp.yml) at {output_dir}")
+    save_params(
+        params=params,
+        yaml_path=os.path.join(output_dir, "hp.yml")
+    )
     with open(os.path.join(output_dir, "training_info.txt"), "w") as f:
         f.write(f"Dataset: {params['dataset']}\n")
         f.write(f"Model: {params['model_name']}\n")
@@ -179,6 +183,7 @@ def train(args: argparse.Namespace):
             device=device,
             log_period=5,
         )
+        scheduler.step()
         
         # validation + checkpoint saving
         if (epoch+1)%args.val_period or True:
@@ -201,4 +206,4 @@ def train(args: argparse.Namespace):
             )
         
 
-        scheduler.step()
+        

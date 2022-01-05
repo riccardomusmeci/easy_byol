@@ -6,7 +6,7 @@
     <img src="static/byol_diagram.png" width="600px"></img>
 </p>
 
-PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning for <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a> or <a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>.
+PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning for <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a>, <a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>, or <a href="https://www.cs.toronto.edu/~kriz/cifar.html"> CIFAR10 Dataset </a>.
 
 
 ### **Dogs Dataset**
@@ -33,7 +33,7 @@ for fpath in tqdm(files, total=len(files)):
 
 ### **Usage**
 
-Set your training params in *hp/BYOL/hp.yml* file. You can change dataset (STL10/dogs), model backbone and training params (epochs, lr, scheduler, etc.). 
+Set your training params in *hp/BYOL/hp.yml* file. You can change dataset (STL10/dogs/CIFAR10), model backbone and training params (epochs, lr, scheduler, etc.). 
 
 Once your params are ready, run the training script:
 
@@ -44,15 +44,14 @@ During training, encoder will be saved as pth file.
 
 To extract features from your validation dataset, run the inference script by specifying weights path.:
 ```
-python inference.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth
+python inference.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth --params checkpoints/byol/byol_2021-12-19-11-35-51/hp.yml
 ```
-Be sure to have the correct dataset name into the hp.yml file.
 
 The inference script will save features, labels, and tsne_features in an output folder.
 
 ### **WebApp Visualization**
 
-Before running the visualization webapp, you must generate the images for the STL10 Dataset. To do so, run the script in *support/stl10.py*. It will generate them in *data/stl10_test/test*.
+Before running the visualization webapp, you must generate the images for the STL10 and the CIFAR10 dataset. To do so, run the scripts in *support* folder (*stl10.py* and *cifar10.py*). They will generate images of the test dataset into *data* folder.
 
 
 You can visualize TSNE features distribution as well as some samples with <a href="https://streamlit.io">streamlit</a>. To run the visualization webapp:

@@ -1,6 +1,6 @@
 model_name: byol                              # model name
 
-dataset: STL10                                # dataset to use among STL10, dogs.
+dataset: CIFAR10                              # dataset to use among STL10, dogs, CIFAR10.
 
 model:
   backbone: resnet18                          # model to use as feature extractor (supported: resnet18, resnet50, effdetb0)
@@ -22,7 +22,7 @@ loss:
   type: norm_mse                              # loss type
 
 transform: 
-  img_size: 96                                # input image size
+  img_size: 32                                # input image size
   mean: [0.485, 0.456, 0.406]                 # ImageNet mean normalization
   std: [0.229, 0.224, 0.225]                  # ImageNet std normalization
   brightness: 0.8                             # color jitter brightness

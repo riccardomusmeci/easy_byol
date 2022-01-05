@@ -88,6 +88,9 @@ def load_categories(dataset: str) -> list:
         df = pd.read_csv("data/dogs/list_breeds.csv", sep=";")
         return list(df["Breed"])
 
+    if dataset == "CIFAR10":
+        categories = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
     return categories
 
 def get_df(dataset: str, features: np.array, labels: np.array) -> pd.DataFrame:
@@ -162,7 +165,7 @@ def get_labels(dataset: str, idxs: str) -> list:
         id2name = {
             row["Id"]: row["Breed"].replace("_", " ").capitalize() for _, row in labels_df.iterrows()
         }
-        imgs = [ f.split(os.sep)[-1] for f in glob("data/dogs/test/*.jpg")]
+        imgs = [ f.split(os.sep)[-1] for f in glob("data/dogs/test/*.jpg") ]
         labels = []
         for idx in idxs:
             _id = imgs[idx].split("_")[0]
@@ -182,6 +185,16 @@ def get_labels(dataset: str, idxs: str) -> list:
             labels.append(id2name[_id])
         return labels
 
+    if dataset == "CIFAR10":
+        categories = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        imgs = [ f.split(os.sep)[-1] for f in glob("data/cifar10_test/test/*.jpg") ] 
+        labels = []
+        for idx in idxs:
+            cat_idx = int(imgs[idx].split(".")[0].split("_")[-1])
+            labels.append(categories[cat_idx])
+
+        return labels
+
 def get_imgs_to_show(dataset: str, features: np.array):
     """Gets random samples to show (anchor + closest samples)
 
@@ -196,13 +209,16 @@ def get_imgs_to_show(dataset: str, features: np.array):
         data_path = "data/dogs/test/*.jpg"
     if dataset == "STL10":
         data_path = "data/stl10_test/test/*.png"
+    if dataset == "CIFAR10":
+        data_path = "data/cifar10_test/test/*.jpg"
 
     img_paths = [f for f in glob(data_path)]
     idxs = get_idxs(features=features)
     ### Random Sample 
     anchor_img = Image.open(img_paths[idxs[0]])
     ### Concatenating Closest samples
-    images = [Image.open(img_paths[idx]).resize((128, 128)) for idx in idxs[1:]]
+    img_size = (128, 128) if dataset != "CIFAR10" else (64, 64)
+    images = [Image.open(img_paths[idx]).resize(img_size) for idx in idxs[1:]]
     widths, heights = zip(*(i.size for i in images))
 
     total_width, max_height= sum(widths), max(heights)
@@ -259,7 +275,8 @@ def render():
             
             anchor, closest_samples, labels = get_imgs_to_show(dataset=dataset, features=features)
             images_col.markdown(f"<h4 style='text-align: left; color: black;'><br>Random Sample ({labels[0]})</h4>", unsafe_allow_html=True)
-            images_col.image(anchor, width=128)
+            anchor_width = 128 if dataset != "CIFAR10" else 64
+            images_col.image(anchor, width=anchor_width)
 
             ### Concatenating Closest samples
             labels_str = " - ".join(labels[1:])
