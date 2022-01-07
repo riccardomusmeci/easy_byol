@@ -5,6 +5,7 @@ import datetime
 import numpy as np
 from PIL import Image
 import torch.nn as nn
+from glob2 import glob
 from typing import Dict
 from src.model.backbone import get_backbone
 
@@ -65,7 +66,7 @@ def read_image(img_path: str) -> Image:
       
     return img.convert('RGB')
 
-def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, loss: float):
+def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, loss: float, save_disk: bool = True):
     """Saves model in a dir
 
     Args:
@@ -74,16 +75,28 @@ def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, lo
         model_name (str): self supervised model name
         backbone_name (str): backbone used
         epoch (int): training epoch
-        loss (float): model loss
-        backbone (bool): whether to save only the backbone part of the model. Defaults to True.
+        loss (float): model loss val
+        save_disk (bool, optional): whether to save only the best model and save disk space. Defaults to True.
+        
     """
-    
+    best_loss = 100000
     os.makedirs(model_dir, exist_ok=True)
-    filename = f"{model_name}_epoch_{epoch}_loss_{loss:.4f}.pth"
-    model_path = os.path.join(model_dir, filename)
-    torch.save(model.state_dict(), model_path)
-    print(f"Saved backbone at {filename}.")
-
+    if save_disk:
+        if epoch > 0:
+            best_pth = [f for f in glob(os.path.join(model_dir, "*.pth"))][0]
+            best_pth = best_pth[0]
+            best_loss = float(best_pth.split(os.sep)[-1].split("_")[-1].split(".pth")[0])
+        else:
+            best_loss = 10000
+    if loss < best_loss:
+        if save_disk and epoch > 0:
+            print(f"Saving disk space: removing old pth file with worse loss ({best_pth}).")
+            os.remove(best_pth)
+        filename = f"{model_name}_epoch_{epoch}_loss_{loss:.4f}.pth"
+        model_path = os.path.join(model_dir, filename)
+        torch.save(model.state_dict(), model_path)
+        print(f"Saved backbone at {filename}.")
+        
 def save_numpy(np_data: np.array, folder: str, filename: str):
     """saves numpy data by ensuring the "npy" ext
 

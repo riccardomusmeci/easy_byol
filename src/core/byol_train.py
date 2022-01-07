@@ -45,7 +45,7 @@ def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period
 
         # Logging
         if (idx+1)%log_period == 0:
-            print(f"Batch {idx}/{len(loader)} - Loss: {loss.item()}")
+            print(f"Batch {idx+1}/{len(loader)} - Loss: {loss.item()}")
 
     del loader
 
@@ -70,7 +70,7 @@ def val_epoch(loader, model, transform, loss_fn, device):
             x1, x2 = x1.to(device), x2.to(device)
             (pred_1, pred_2), (targ_1, targ_2) = model(x1, x2)
             loss += torch.mean(loss_fn(pred_1, targ_2) + loss_fn(pred_2, targ_1))
-        
+
     avg_loss = loss/len(loader)
     print(f"Val loss {avg_loss}")
     del loader
@@ -203,6 +203,7 @@ def train(args: argparse.Namespace):
                 model_name=args.model + "_" + params["model"]["backbone"],
                 epoch=epoch,
                 loss=val_loss,
+                save_disk=args.save_disk
             )
         
 
