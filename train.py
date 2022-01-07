@@ -45,6 +45,13 @@ def parse_args():
         help="Random seed. Default: 42"
     )
 
+    parser.add_argument(
+        "--save-disk",
+        default=True,
+        type=lambda x: True if x.lower() == "true" else False,
+        help="save disk mode when saving pth checkpoints model"
+    )
+
     return parser.parse_args()
 
 if __name__ == "__main__":
