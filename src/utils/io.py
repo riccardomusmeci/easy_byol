@@ -84,7 +84,6 @@ def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, lo
     if save_disk:
         if epoch > 0:
             best_pth = [f for f in glob(os.path.join(model_dir, "*.pth"))][0]
-            best_pth = best_pth[0]
             best_loss = float(best_pth.split(os.sep)[-1].split("_")[-1].split(".pth")[0])
         else:
             best_loss = 10000
