@@ -13,7 +13,7 @@ CHECKPOINT_FOLDER = "checkpoints/byol"
 st.set_page_config(layout="wide")
 
 
-def load_numpy_data(folder: str, tsne: bool = True) -> Tuple[np.array, np.array]:
+def load_numpy_data(folder: str, tsne: bool = True) -> Tuple[np.array, np.array, np.array]:
     """loads numpy data for features and labels
 
     Args:
@@ -21,13 +21,13 @@ def load_numpy_data(folder: str, tsne: bool = True) -> Tuple[np.array, np.array]
         tsne (bool): whether to load tsne features. Defaults to True.
 
     Returns:
-        Tuple[np.array, np.array]: features, labels
+        Tuple[np.array, np.array]: features, tsn_features, labels
     """
-    features_f = "tsne_features.npy" if tsne else "features.npy"
-    features = np.load(file=os.path.join(folder, features_f))
+    tsne_features = np.load(file=os.path.join(folder, "tsne_features.npy")) 
+    features = np.load(file=os.path.join(folder, "features.npy"))
     labels = np.load(file=os.path.join(folder, "labels.npy"))
 
-    return features, labels
+    return features, tsne_features, labels
 
 def get_colormap(dataset: str) -> dict:
     """returns color map for dataset categories
@@ -260,7 +260,7 @@ def render():
         st.session_state.folder = option
         dataset = get_dataset(training_info_txt=os.path.join(CHECKPOINT_FOLDER, option, "training_info.txt"))
         folder = f"{OUTPUT_FOLDER}/{option}"
-        features, labels = load_numpy_data(
+        features, tsne_features, labels = load_numpy_data(
             folder=folder,
             tsne=True
         )
@@ -270,7 +270,7 @@ def render():
             features_col.markdown(f"<h3 style='text-align: center; color: black;'>{_dataset} Features</h3>", unsafe_allow_html=True)
             feat_distr = get_df(
                 dataset=dataset,
-                features=features,
+                features=tsne_features,
                 labels=labels
             )
             fig = px.scatter_3d(
