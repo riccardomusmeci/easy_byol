@@ -1,4 +1,4 @@
-# **Self Supervised Methods Comparison**
+# **easy_byol**
 
 ## **Bootstrap Your Own Latent (BYOL) - PyTorch**
 
@@ -6,7 +6,7 @@
     <img src="static/byol_diagram.png" width="600px"></img>
 </p>
 
-PyTorch implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning for <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a>, <a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>, or <a href="https://www.cs.toronto.edu/~kriz/cifar.html"> CIFAR10 Dataset </a>.
+PyTorch custom implementation of <a href="https://arxiv.org/abs/2006.07733">BYOL</a> method for self-supervised learning for <a href="https://cs.stanford.edu/~acoates/stl10/"> STL10 Dataset</a>, <a href="https://www.kaggle.com/michaelfumery/unlabeled-stanford-dags-dataset"> Dogs Dataset </a>, or <a href="https://www.cs.toronto.edu/~kriz/cifar.html"> CIFAR10 Dataset </a>.
 
 
 ### **Dogs Dataset**
@@ -66,18 +66,3 @@ By clicking on "View Random Samples" button the webapp will show a sample and th
 <p align="center">
     <img src="static/streamlit.jpg" width="700px"></img>
 </p>
-
-
-### **To-Do List**
-
-
-[ ] Fix Custom Random ColorJitter and GaussianBlur transformations 
-
-[ ] Tensorboard integration
-
-[ ] GradCAM image visualization
-
-[ ] DINO
-
-
-
