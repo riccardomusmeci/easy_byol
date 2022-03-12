@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from src.core.inference import inference
 
 def parse_args():
     """Parses arguments from command line
@@ -7,13 +8,6 @@ def parse_args():
         argparse.Namespace: arguments
     """
     parser = ArgumentParser("Self-Supervised-Learning inference script.")
-    parser = ArgumentParser()
-
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Name of the model to train"
-    )
 
     parser.add_argument(
         "--weights",
@@ -44,12 +38,5 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == "__main__":
-
     args = parse_args()
-
-    if args.model == "byol":
-        from src.core.byol_inference import inference
-        inference(args)
-
-    else:
-        print(f"No implementation for {args.model}")
+    inference(args)

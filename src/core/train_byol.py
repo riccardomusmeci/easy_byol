@@ -5,11 +5,10 @@ from tqdm import tqdm
 from src.model.byol import BYOL
 from src.loss.loss import get_loss_fn
 from torch.utils.data import DataLoader
-
 from src.dataset.dataset import load_dataset
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
-from src.augmentation.augmentations import get_transform
+from src.transform.transform import BYOL_transform
 from src.utils.io import load_params, save_model, now, save_params
 
 def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period = 10):
@@ -87,7 +86,7 @@ def save_training_info(params: dict, output_dir: str):
     print(f"Saving training information (txt recap + hp.yml) at {output_dir}")
     save_params(
         params=params,
-        yaml_path=os.path.join(output_dir, "hp.yml")
+        dst_path=os.path.join(output_dir, "hp.yml")
     )
     with open(os.path.join(output_dir, "training_info.txt"), "w") as f:
         f.write(f"Dataset: {params['dataset']}\n")
@@ -122,11 +121,11 @@ def train(args: argparse.Namespace):
     print(f"Training on {device}")
 
     # loading params
-    params_path = os.path.join(args.hp_dir, args.model, "hp.yml")
+    params_path = os.path.join(args.hp_dir, "byol", "hp.yml")
     params = load_params(path=params_path)
 
     # training output dir
-    output_dir = os.path.join(args.checkpoints_dir, args.model, f"{args.model}_{now()}")
+    output_dir = os.path.join(args.checkpoints_dir, "byol", f"byol_{now()}")
     print(f"Model checkpoints will be saved at {output_dir}")
     
     # creating BYOL model
@@ -134,9 +133,22 @@ def train(args: argparse.Namespace):
     
     # to cuda (if possivle)
     byol = byol.cuda() if torch.cuda.is_available() else byol
-
+    
+    # Image Augmentations
+    train_transform = BYOL_transform(
+        mode="train", 
+        **params["transform"]
+    )
+    val_transform = BYOL_transform(
+        mode="val", 
+        img_size=params["transform"]["img_size"]
+    )
+    
     # loading datasets
-    train_dataset, val_dataset = load_dataset(name=params["dataset"], img_size=params["transform"]["img_size"])
+    train_dataset, val_dataset = load_dataset(
+        name=params["dataset"], 
+        img_size=params["transform"]["img_size"]
+    )
     
     # getting data loaders
     train_loader = DataLoader(
@@ -174,10 +186,7 @@ def train(args: argparse.Namespace):
         train_epoch(
             loader=train_loader,
             model=byol,
-            transform=get_transform(
-                mode="train",
-                **params["transform"]
-            ),
+            transform=train_transform,
             loss_fn=loss_fn,
             optimizer=optimizer,
             device=device,
@@ -190,17 +199,14 @@ def train(args: argparse.Namespace):
             val_loss = val_epoch(
                 loader=val_loader,
                 model=byol,
-                transform=get_transform(
-                    mode="val",
-                    img_size=params["transform"]["img_size"]
-                ),
+                transform=val_transform,
                 loss_fn=loss_fn,
                 device=device
             )
             save_model(
                 model=byol.g.backbone, # backbone trained in self supervised manner with BYOL
                 model_dir=output_dir,
-                model_name=args.model + "_" + params["model"]["backbone"],
+                model_name="byol_" + params["model"]["backbone"],
                 epoch=epoch,
                 loss=val_loss,
                 save_disk=args.save_disk

@@ -57,7 +57,6 @@ class Encoder(nn.Module):
             self._projector.train()
         return self._projector
 
-
     def _hook(self, _, __, output: torch.Tensor):
         """this hook gets the output of the layer of interest, sets _projection_dim if necessary, and the calls @property projector to set self._encoded field
 
@@ -78,7 +77,6 @@ class Encoder(nn.Module):
         # here if self.projector is called the first time, it is created with @property projector
         # print("[_hook] Encoding with projector..")
         self._encoded = self.projector(output)
-        # print(f"[_hook] Encoding output {self._encoded.shape}")
 
     def _register_hook(self):
         """Registers hook for layer of interest

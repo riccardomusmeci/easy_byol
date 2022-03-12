@@ -7,7 +7,6 @@ from PIL import Image
 import torch.nn as nn
 from glob2 import glob
 from typing import Dict
-from src.model.backbone import get_backbone
 
 STRFTIME_FORMAT = "%Y-%m-%d-%H-%M-%S"
 
@@ -15,14 +14,14 @@ def now():
     STRFTIME_FORMAT = "%Y-%m-%d-%H-%M-%S"
     return datetime.datetime.now().strftime(STRFTIME_FORMAT)
 
-def save_params(params: dict, yaml_path: str):
+def save_params(params: dict, dst_path: str):
     """Saves dict into yaml file
 
     Args:
         params (dict): params dict
         path (str): path
     """
-    with open(yaml_path, 'w') as f:
+    with open(dst_path, 'w') as f:
         try:
             yaml.safe_dump(params, f)
         except yaml.YAMLError as exc:
@@ -66,7 +65,7 @@ def read_image(img_path: str) -> Image:
       
     return img.convert('RGB')
 
-def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, loss: float, save_disk: bool = True):
+def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, loss: float, acc: float = None, save_disk: bool = True):
     """Saves model in a dir
 
     Args:
@@ -76,6 +75,7 @@ def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, lo
         backbone_name (str): backbone used
         epoch (int): training epoch
         loss (float): model loss val
+        acc (float): model accuracy val. Defaults to None.
         save_disk (bool, optional): whether to save only the best model and save disk space. Defaults to True.
         
     """
@@ -91,7 +91,10 @@ def save_model(model: nn.Module, model_dir: str, model_name: str, epoch: int, lo
         if save_disk and epoch > 0:
             print(f"Saving disk space: removing old pth file with worse loss ({best_pth}).")
             os.remove(best_pth)
-        filename = f"{model_name}_epoch_{epoch}_loss_{loss:.4f}.pth"
+        if acc is not None:
+            filename = f"{model_name}_epoch_{epoch}_loss_{loss:.4f}_acc_{acc:.4f}.pth"
+        else:
+            filename = f"{model_name}_epoch_{epoch}_loss_{loss:.4f}.pth"
         model_path = os.path.join(model_dir, filename)
         torch.save(model.state_dict(), model_path)
         print(f"Saved backbone at {filename}.")

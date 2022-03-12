@@ -1,10 +1,9 @@
 import random
 import torch.nn as nn
 from torchvision import transforms as T
-from src.augmentation.rand_augmentations import RandomColorJitter, RandomGaussianBlur
 
 
-def get_transform(
+def BYOL_transform(
     mode: str, 
     img_size: int=96, 
     mean: list = [0.485, 0.456, 0.406], 
@@ -68,3 +67,15 @@ def get_transform(
         ])
 
     
+def easy_transform(
+    img_size: int=96, 
+    mean: list = [0.485, 0.456, 0.406], 
+    std: list = [0.229, 0.224, 0.225],
+):
+    return T.Compose([
+        T.Resize(size=img_size),
+        T.ToTensor(),
+        T.Normalize(mean, std)
+    ])
+    
+    return transform

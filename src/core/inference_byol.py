@@ -10,7 +10,7 @@ from src.utils.io import save_numpy
 from src.utils.io import load_params
 from torch.utils.data import DataLoader
 from src.dataset.dataset import load_dataset
-from src.augmentation.augmentations import get_transform
+from src.transform.transform import BYOL_transform  
 
 def save_outputs(folder: str, features: np.array, tsne_features: np.array, labels: np.array):
     """Save outputs from inference
@@ -72,7 +72,7 @@ def inference(args: argparse.Namespace):
         batch_size=params["train"]["batch_size"]
     )
 
-    transform = get_transform(
+    transform = BYOL_transform(
         mode="val", 
         img_size=params["transform"]["img_size"]
     )

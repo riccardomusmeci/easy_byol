@@ -23,8 +23,7 @@ def get_backbone(model: str = "resnet50", pretrained: bool = True) -> nn.Module:
     if model=="resnet18":
         backbone=models.resnet18(pretrained=pretrained)
         layer="avgpool"
-    
-    
+        
     return backbone, layer
         
         

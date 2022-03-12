@@ -1,5 +1,5 @@
 import torch.nn as nn
-from torch.optim import Optimizer, Adam
+from torch.optim import Optimizer, Adam, SGD
 
 def get_optimizer(model: nn.Module, algo: str = "adam", lr: float = 1e-4, weight_decay: float = 1e-6) -> Optimizer:
     """returns the optimizer to train the model

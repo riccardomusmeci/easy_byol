@@ -12,6 +12,10 @@ def get_loss_fn(loss: str = "norm_mse") -> nn.Module:
     """
     if loss == "norm_mse":
         return NormalizedMSE()
-    else:
-        print("Only Normalized MSE is implemented. Quitting.")
+    
+    if loss == "xent":
+        return nn.CrossEntropyLoss()
+    
+    print("Only Normalized MSE and Xent are implemented. Quitting.")
+    quit()
 
