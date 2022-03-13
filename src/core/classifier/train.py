@@ -1,50 +1,35 @@
+
 import os
 import torch
-import random
-import numpy as np
 from tqdm import tqdm
 from argparse import Namespace
 import torch.nn.functional as F
 from src.loss.loss import get_loss_fn
 from torch.utils.data import DataLoader
-from src.model.classifier import load_classifier
+from src.utils.repr import reproducibility
+from src.model.classifier import classifier
+from src.utils.pth_saver import PthSaverAccuracy
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
 from src.transform.transform import easy_transform
+from src.utils.io import load_config, now, dump_config
 from src.dataset.dataset import load_dataset, num_classes
-from src.utils.io import load_params, now, save_model, save_params
 
-
-infer_backbone = lambda x : x.split("/")[-1].split("_")[1]
-
-def reproducibility(seed=42):
-    
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-
-def save_training_info(params: dict, output_dir: str):
+def print_setting(config: dict):
     """prints training information
 
     Args:
-        params (dict): training params
-        output_dir (str): where to save training ingo
+        config (dict): training config
     """
-    os.makedirs(output_dir, exist_ok=True)
-    print(f"Saving training information (txt recap + hp.yml) at {output_dir}")
-    save_params(
-        params=params,
-        dst_path=os.path.join(output_dir, "hp.yml")
-    )
-    
-    print("Training information:")
-    print(f"\t> Dataset: {params['dataset']}")
-    print(f"\t> Model: {params['model']['backbone']}")
-    print(f"\t> Image Size: {params['transform']['img_size']}")
-    print(f"\t> Epochs: {params['train']['epochs']}")
-    print(f"\t> Optimizer Algorithm: {params['optimizer']['algo']}")
-    print(f"\t> Scheduler Algorithm: {params['scheduler']['algo']}")
-    print(f"\t> Loss: {params['train']['loss']}")
+    print("Training setting:")
+    print(f"\t> Dataset: {config['dataset']}")
+    print(f"\t> Model: {config['model']}")
+    print(f"\t> Backbone Frozen: {config['train']['freeze']}")
+    print(f"\t> Image Size: {config['transform']['img_size']}")
+    print(f"\t> Epochs: {config['train']['epochs']}")
+    print(f"\t> Optimizer Algorithm: {config['optimizer']['algo']}")
+    print(f"\t> Scheduler Algorithm: {config['scheduler']['algo']}")
+    print(f"\t> Loss: {config['train']['loss']}")
 
 def train_epoch(loader, model, loss_fn, optimizer, device, log_period = 10):
     """training epoch
@@ -129,34 +114,35 @@ def train(args: Namespace):
     Args:
         args (argparse.Namespace): arguments
     """
-    
-    reproducibility()
+    # setting seeed for reproducibility
+    reproducibility(args.seed)
 
     # getting device info
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print(f"Training classifier on {device}")
 
-    # loading params
-    params_path = os.path.join(args.hp_dir, "classifier", "hp.yml")
-    params = load_params(path=params_path)
+    # loading BYOL config
+    byol_config = load_config(path=os.path.join(args.ssl_dir, "config.yml"))
+    backbone = byol_config["model"]["backbone"]
+    
+    # loading Classifier config
+    config_path = os.path.join(args.config_dir, "classifier", "config.yml")
+    config = load_config(path=config_path)
+    config["model"] = backbone
 
     # training output dir
     output_dir = os.path.join(args.checkpoints_dir, "classifier", f"classifier_{now()}")
     os.makedirs(output_dir)
     print(f"Model checkpoints will be saved at {output_dir}")
     
-    n_classes = num_classes(dataset=params['dataset'])
-    print(f"Dataset {params['dataset']} - num_classes: {n_classes}")
-    
-    # Inferring backbone from BYOL model
-    backbone = infer_backbone(args.ssl_weights)
-    params["model"]["backbone"] = backbone
+    n_classes = num_classes(dataset=config['dataset'])
+    print(f"Dataset {config['dataset']} - num_classes: {n_classes}")
         
     # creating classifier model
-    model = load_classifier(
-        backbone=backbone,
-        weights_path=args.ssl_weights,
-        freeze=params["model"]["freeze"],
+    model = classifier(
+        backbone=config["model"],
+        weights_path=os.path.join(args.ssl_dir, "weights", args.ssl_pth),
+        freeze=config["train"]["freeze"],
         n_classes=n_classes
     )
     
@@ -164,47 +150,60 @@ def train(args: Namespace):
     model = model.cuda() if torch.cuda.is_available() else model
     
     # loading transformations
-    transform = easy_transform(**params["transform"])
+    transform = easy_transform(**config["transform"])
     
     # loading datasets
     train_dataset, val_dataset = load_dataset(
-        name=params["dataset"], 
+        name=config["dataset"], 
         transform=transform,
-        img_size=params["transform"]["img_size"]
+        img_size=config["transform"]["img_size"]
     )
     
     # getting data loaders
     train_loader = DataLoader(
         dataset=train_dataset,
-        batch_size=params["train"]["batch_size"],
+        batch_size=config["train"]["batch_size"],
         shuffle=True,
         drop_last=True
     )
     val_loader = DataLoader(
         dataset=val_dataset,
-        batch_size=params["train"]["batch_size"]
+        batch_size=config["train"]["batch_size"]
     )
 
     # optimizer + scheduler + loss_fn
     optimizer = get_optimizer(
         model=model,
-        **params["optimizer"]
+        **config["optimizer"]
     )
-    scheduler_algo = params["scheduler"]["algo"]
+    scheduler_algo = config["scheduler"]["algo"]
     scheduler = get_scheduler(
         optimizer=optimizer,
         scheduler=scheduler_algo,
-        **params["scheduler"][scheduler_algo]
+        **config["scheduler"][scheduler_algo]
     )
-    loss_fn = get_loss_fn(loss=params["train"]["loss"])
-    epochs = params["train"]["epochs"]
+    loss_fn = get_loss_fn(loss=config["train"]["loss"])
+    epochs = config["train"]["epochs"]
     
-    # # printing and saving training information
-    save_training_info(params, output_dir)
+    # dumping config dict
+    dump_config(
+        config=config,
+        dst_dir=output_dir
+    )
+    
+    # printing training settings
+    print_setting(config)
+    
+    # init pth saver based on accuracy
+    pth_saver = PthSaverAccuracy(
+        pth_dir=os.path.join(output_dir, "weights"),
+        model_name="classifier_" + config["model"],
+        save_disk=args.save_disk
+    )
     
     print(f"Starting training for {epochs} epochs")
     for epoch in range(epochs):
-        print(f"Epoch {epoch}/{epochs}")
+        print(f"Epoch {epoch+1}/{epochs}")
         # epoch train
         train_epoch(
             loader=train_loader,
@@ -224,13 +223,10 @@ def train(args: Namespace):
                 loss_fn=loss_fn,
                 device=device
             )
-            save_model(
-                model=model, # backbone trained in self supervised manner with BYOL
-                model_dir=output_dir,
-                model_name="classifier_" + backbone,
+            
+            pth_saver.save(
+                model=model,
                 epoch=epoch,
                 loss=val_loss,
-                acc=acc,
-                save_disk=args.save_disk
+                acc=acc
             )
-        

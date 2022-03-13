@@ -7,12 +7,17 @@ from tqdm import tqdm
 from sklearn.manifold import TSNE
 from src.model.byol import Encoder
 from src.utils.io import save_numpy
-from src.utils.io import load_params
+from src.utils.io import load_config
 from torch.utils.data import DataLoader
 from src.dataset.dataset import load_dataset
 from src.transform.transform import BYOL_transform  
 
-def save_outputs(folder: str, features: np.array, tsne_features: np.array, labels: np.array):
+def save_outputs(folder: str, 
+                 features: np.array, 
+                 tsne_features: np.array, 
+                 labels: np.array
+                 ):
+    
     """Save outputs from inference
 
     Args:
@@ -48,33 +53,36 @@ def inference(args: argparse.Namespace):
     Args:
         args (argparse.Namespace): arguments
     """
-
+    
     # getting device info
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print(f"Testing on {device}")
 
-    # loading params
-    params_path = os.path.join(args.params)
-    params = load_params(path=params_path)
-    print(f"Inference on {params['dataset']} dataset.")
+    # loading config
+    config = load_config(path=args.config)
+    print(f"Inference on {config['dataset']} dataset.")
     
     # Getting encoder and setting to eval mode
-    encoder = Encoder(backbone=params["model"]["backbone"])
+    encoder = Encoder(backbone=config["model"]["backbone"])
     encoder.backbone.load_state_dict(torch.load(args.weights, map_location=torch.device('cpu')))
     encoder.eval()
 
     # loading datasets
-    _, val_dataset = load_dataset(name=params["dataset"], mode="val", img_size=params["transform"]["img_size"])
+    _, val_dataset = load_dataset(
+        name=config["dataset"], 
+        mode="val", 
+        img_size=config["transform"]["img_size"]
+    )
     
     # getting data loaders
     val_loader = DataLoader(
         dataset=val_dataset,
-        batch_size=params["train"]["batch_size"]
+        batch_size=config["train"]["batch_size"]
     )
 
     transform = BYOL_transform(
         mode="val", 
-        img_size=params["transform"]["img_size"]
+        img_size=config["transform"]["img_size"]
     )
     print("Extracting features from Encoder")
     features, labels = [], []
@@ -97,7 +105,7 @@ def inference(args: argparse.Namespace):
         tsne_features = tsne.fit_transform(X=features, y=labels)
         
     save_outputs(
-        folder=os.path.join(args.output_dir, args.weights.split(os.sep)[-2]),
+        folder=os.path.join(args.output_dir, args.weights.split(os.sep)[-3]),
         features=features,
         tsne_features=tsne_features if args.tsne else None,
         labels=labels

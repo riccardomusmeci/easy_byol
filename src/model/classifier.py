@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from src.model.backbone import get_backbone
 
-def load_classifier(backbone: str,
+def classifier(backbone: str,
                     weights_path: str,
                     freeze: bool = True,
                     n_classes: int = 10
@@ -41,12 +41,40 @@ def load_classifier(backbone: str,
                 continue
             if param.requires_grad:
                 param.requires_grad=False
-    
     print(f"Setting number of classes to predict to {n_classes}.")
     model.fc = nn.Linear(model.fc.in_features, n_classes)
+    
 
     return model
     
     
+def load_classifier(model: str,
+                    weights_path: str,
+                    n_classes: int = 10
+                    ) -> nn.Module:
+    """loads classifier and assigns weights from path
+
+    Args:
+        model (str): model name (e.g. resnet18)
+        weights_path (str): path to pth file
+        n_classes (int, optional): num classes to infer. Defaults to 10.
+
+    Returns:
+        nn.Module: model
+    """
+    model, _ = get_backbone(
+        model=model,
+        pretrained=False
+    )
     
+    model.fc = nn.Linear(model.fc.in_features, n_classes)
+    pretrained_dict = torch.load(
+        weights_path, 
+        map_location=torch.device('cpu')
+    )
     
+    print("Setting weights to model")
+    for k, v in pretrained_dict.items():
+        model.state_dict()[k].copy_(v)
+    
+    return model

@@ -33,7 +33,7 @@ for fpath in tqdm(files, total=len(files)):
 
 ### **BYOL Usage**
 
-Set your training params in *hp/BYOL/hp.yml* file. You can change dataset (STL10/dogs/CIFAR10), model backbone and training params (epochs, lr, scheduler, etc.). 
+Set your training params in *config/BYOL/config.yml* file. You can change dataset (STL10/dogs/CIFAR10), model backbone and training params (epochs, lr, scheduler, etc.). 
 
 Once your params are ready, run the training script:
 
@@ -44,7 +44,7 @@ During training, encoder will be saved as pth file.
 
 To extract features from your validation dataset, run the byol inference script by specifying weights path.:
 ```
-python inference_byol.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth --params checkpoints/byol/byol_2021-12-19-11-35-51/hp.yml
+python inference_byol.py --model byol --weights checkpoints/byol/byol_2021-12-19-11-35-51/byol_resnet18_epoch_2_loss_0.1236.pth --params checkpoints/byol/byol_2021-12-19-11-35-51/config.yml
 ```
 
 The inference script will save features, labels, and tsne_features in an output folder.

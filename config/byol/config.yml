@@ -10,8 +10,8 @@ model:
   beta: 0.999                                 # EMA param to update target weights
 
 train:
-  epochs: 1000                                # training epochs
-  batch_size: 1024                            # batch size
+  epochs: 2                                   # training epochs
+  batch_size: 32                              # batch size
   
 optimizer:
   algo: adam                                  # optimization algorithm
@@ -23,8 +23,8 @@ loss:
 
 transform: 
   img_size: 32                                # input image size
-  mean: [0.5, 0.5, 0.5]                       # ImageNet mean normalization ([0.485, 0.456, 0.406])
-  std: [0.5, 0.5, 0.5]                        # ImageNet std normalization ([0.229, 0.224, 0.225])
+  mean: [0.485, 0.456, 0.406]                 # ImageNet mean normalization ([0.485, 0.456, 0.406])
+  std: [0.229, 0.224, 0.225]                  # ImageNet std normalization ([0.229, 0.224, 0.225])
   brightness: 0.4                             # color jitter brightness
   contrast: 0.4                               # color jitter contrast
   saturation: 0.2                             # color jitter saturation

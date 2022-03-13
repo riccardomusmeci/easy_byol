@@ -5,11 +5,13 @@ from tqdm import tqdm
 from src.model.byol import BYOL
 from src.loss.loss import get_loss_fn
 from torch.utils.data import DataLoader
+from src.utils.repr import reproducibility
 from src.dataset.dataset import load_dataset
+from src.utils.pth_saver import PthSaverLoss
 from src.optimizer.optimizer import get_optimizer
 from src.optimizer.scheduler import get_scheduler
 from src.transform.transform import BYOL_transform
-from src.utils.io import load_params, save_model, now, save_params
+from src.utils.io import load_config, now, copy_config
 
 def train_epoch(loader, model, transform, loss_fn, optimizer, device, log_period = 10):
     """training epoch
@@ -75,39 +77,21 @@ def val_epoch(loader, model, transform, loss_fn, device):
     del loader
     return avg_loss
 
-def save_training_info(params: dict, output_dir: str):
+def print_setting(config: dict):
     """prints training information
 
     Args:
-        params (dict): training params
-        output_dir (str): where to save training ingo
+        config (dict): training config
     """
-    os.makedirs(output_dir, exist_ok=True)
-    print(f"Saving training information (txt recap + hp.yml) at {output_dir}")
-    save_params(
-        params=params,
-        dst_path=os.path.join(output_dir, "hp.yml")
-    )
-    with open(os.path.join(output_dir, "training_info.txt"), "w") as f:
-        f.write(f"Dataset: {params['dataset']}\n")
-        f.write(f"Model: {params['model_name']}\n")
-        f.write(f"Model Backbone: {params['model']['backbone']}\n")
-        f.write(f"Image Size: {params['transform']['img_size']}\n")
-        f.write(f"Epochs: {params['train']['epochs']}\n")
-        f.write(f"Optimizer Algorithm: {params['optimizer']['algo']}\n")
-        f.write(f"Scheduler Algorithm: {params['scheduler']['algo']}\n")
-        f.write(f"Loss: {params['loss']['type']}\n")
-    f.close()
-
-    print("Training information:")
-    print(f"\t> Dataset: {params['dataset']}")
-    print(f"\t> Model: {params['model_name']}")
-    print(f"\t> Model Backbone: {params['model']['backbone']}")
-    print(f"\t> Image Size: {params['transform']['img_size']}")
-    print(f"\t> Epochs: {params['train']['epochs']}")
-    print(f"\t> Optimizer Algorithm: {params['optimizer']['algo']}")
-    print(f"\t> Scheduler Algorithm: {params['scheduler']['algo']}")
-    print(f"\t> Loss: {params['loss']['type']}")
+    print("Training setting:")
+    print(f"\t> Dataset: {config['dataset']}")
+    print(f"\t> Model: {config['model_name']}")
+    print(f"\t> Model Backbone: {config['model']['backbone']}")
+    print(f"\t> Image Size: {config['transform']['img_size']}")
+    print(f"\t> Epochs: {config['train']['epochs']}")
+    print(f"\t> Optimizer Algorithm: {config['optimizer']['algo']}")
+    print(f"\t> Scheduler Algorithm: {config['scheduler']['algo']}")
+    print(f"\t> Loss: {config['loss']['type']}")
 
 def train(args: argparse.Namespace):
     """Performs BYOL training
@@ -116,69 +100,86 @@ def train(args: argparse.Namespace):
         args (argparse.Namespace): arguments
     """
 
+    # reproducibility
+    reproducibility(args.seed)
+    
     # getting device info
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print(f"Training on {device}")
 
-    # loading params
-    params_path = os.path.join(args.hp_dir, "byol", "hp.yml")
-    params = load_params(path=params_path)
+    # loading config
+    config_path = os.path.join(args.config_dir, "byol", "config.yml")
+    config = load_config(path=config_path)
 
     # training output dir
     output_dir = os.path.join(args.checkpoints_dir, "byol", f"byol_{now()}")
+    os.makedirs(output_dir, exist_ok=True)
     print(f"Model checkpoints will be saved at {output_dir}")
     
     # creating BYOL model
-    byol = BYOL(**params["model"])
+    byol = BYOL(**config["model"])
     
-    # to cuda (if possivle)
+    # to cuda (if possible)
     byol = byol.cuda() if torch.cuda.is_available() else byol
     
     # Image Augmentations
     train_transform = BYOL_transform(
         mode="train", 
-        **params["transform"]
+        **config["transform"]
     )
     val_transform = BYOL_transform(
         mode="val", 
-        img_size=params["transform"]["img_size"]
+        img_size=config["transform"]["img_size"]
     )
     
     # loading datasets
     train_dataset, val_dataset = load_dataset(
-        name=params["dataset"], 
-        img_size=params["transform"]["img_size"]
+        name=config["dataset"], 
+        img_size=config["transform"]["img_size"]
     )
     
     # getting data loaders
     train_loader = DataLoader(
         dataset=train_dataset,
-        batch_size=params["train"]["batch_size"],
+        batch_size=config["train"]["batch_size"],
         shuffle=True,
         drop_last=True
     )
     val_loader = DataLoader(
         dataset=val_dataset,
-        batch_size=params["train"]["batch_size"]
+        batch_size=config["train"]["batch_size"]
     )
 
     # optimizer + scheduler + loss_fn
     optimizer = get_optimizer(
         model=byol,
-        **params["optimizer"]
+        **config["optimizer"]
     )
-    scheduler_algo = params["scheduler"]["algo"]
+    scheduler_algo = config["scheduler"]["algo"]
     scheduler = get_scheduler(
         optimizer=optimizer,
         scheduler=scheduler_algo,
-        **params["scheduler"][scheduler_algo]
+        **config["scheduler"][scheduler_algo]
     )
-    loss_fn = get_loss_fn(loss=params["loss"]["type"])
-    epochs = params["train"]["epochs"]
+    loss_fn = get_loss_fn(loss=config["loss"]["type"])
+    epochs = config["train"]["epochs"]
     
-    # printing and saving training information
-    save_training_info(params, output_dir)
+    # saving training config
+    copy_config(
+        src_config_path=config_path,
+        dst_dir=output_dir
+    )
     
+    # print training setting
+    print_setting(config=config)
+    
+    # init pth saver based on loss
+    pth_saver = PthSaverLoss(
+        pth_dir=os.path.join(output_dir, "weights"),
+        model_name="byol_" + config["model"]["backbone"],
+        save_disk=args.save_disk
+    )
+
     print(f"Starting training for {epochs} epochs")
     for epoch in range(epochs):
         print(f"Epoch {epoch}/{epochs}")
@@ -203,13 +204,11 @@ def train(args: argparse.Namespace):
                 loss_fn=loss_fn,
                 device=device
             )
-            save_model(
-                model=byol.g.backbone, # backbone trained in self supervised manner with BYOL
-                model_dir=output_dir,
-                model_name="byol_" + params["model"]["backbone"],
+            
+            pth_saver.save(
+                model=byol.g.backbone,
                 epoch=epoch,
-                loss=val_loss,
-                save_disk=args.save_disk
+                loss=val_loss
             )
         
 

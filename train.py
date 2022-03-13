@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
-from src.core.train_classifier import train
+from src.core.byol.train import train as train_byol
+from src.core.classifier.train import train as train_classifier
 
 def parse_args():
     """Parses arguments from command line
@@ -10,17 +11,31 @@ def parse_args():
     parser = ArgumentParser()
     
     parser.add_argument(
-        "--ssl-weights",
+        "--model",
         type=str,
-        default="checkpoints/byol/byol_2021-12-19-11-59-58/byol_resnet18_epoch_0_loss_0.0323.pth",
-        help="path to byol trained weights for the encoder."
+        required=True,
+        help="byol or classifier training"
+    )
+    
+    parser.add_argument(
+        "--ssl-dir",
+        type=str,
+        default="checkpoints/byol/byol_2022-03-13-12-51-30",
+        help="path to byol dir with training data (weights/*.pth and config.yml) for the encoder. Only if --model is set to classifier."
+    )
+    
+    parser.add_argument(
+        "--ssl-pth",
+        type=str,
+        default="byol_resnet18_epoch_0_loss_0.0323.pth",
+        help="encoder pth file in ssl weights dir. Only if --model is set to classifier."
     )
 
     parser.add_argument(
-        "--hp-dir",
+        "--config-dir",
         type=str,
-        default="hp",
-        help="Dir containing hp.yml for each model. Default to hp."
+        default="config",
+        help="Dir containing config.yml for each model. Default to config."
     )
 
     parser.add_argument(
@@ -55,4 +70,7 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    train(args)
+    if args.model == "byol":
+        train_byol(args)
+    elif args.model == "classifier":
+        train_classifier(args)
