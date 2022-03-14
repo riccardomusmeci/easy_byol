@@ -2,25 +2,30 @@ model_name: byol                              # model name
 
 dataset: CIFAR10                              # dataset to use among STL10, dogs, CIFAR10.
 
+###### BYOL Encoder ######
 model:
   backbone: resnet18                          # model to use as feature extractor (supported: resnet18, resnet50, effdetb0)
-  pretrained: false                           # load pretrained weights for backbone
+  pretrained: true                            # load pretrained weights for backbone
   hidden_size: 4096                           # MLP predictor hidden units
   projection_size: 256                        # MLP output size
-  beta: 0.999                                 # EMA param to update target weights
+  beta: 0.996                                 # EMA param to update target weights
 
+###### Train Settings ######
 train:
-  epochs: 2                                   # training epochs
+  epochs: 100                                 # training epochs
   batch_size: 32                              # batch size
-  
+
+###### Optimizer ######  
 optimizer:
   algo: adam                                  # optimization algorithm
   lr: 0.02                                    # learning rate
   weight_decay: 1.5e-6                        # weight decay                     
 
+###### Loss Criterion ######
 loss:
   type: norm_mse                              # loss type
 
+###### Augmentations ######
 transform: 
   img_size: 32                                # input image size
   mean: [0.485, 0.456, 0.406]                 # ImageNet mean normalization ([0.485, 0.456, 0.406])
@@ -36,6 +41,7 @@ transform:
   sigma: [.1, 2]                              # gaussian blur params
   gaussian_blur_p: 0.1                        # gaussian blur transformation probability
 
+###### Scheduler config ######
 scheduler:
   algo: cosine                                # scheduler algorithm    
   cosine:                                     # cosine params
@@ -46,4 +52,4 @@ scheduler:
     start_factor: 0.8                         # linear scaling factor at each iter
     end_factor: 1.0                           # the number we multiply learning rate at the end of linear changing process
     total_iters: 10                           # number of epochs for applying linear lr scherduling
-    verbose: true
+    verbose: true                             # verbose mode

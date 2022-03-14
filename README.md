@@ -124,7 +124,9 @@ loss:
 ```
 You can extend the code as shown above for almost every configuration in the config.yml of both classifier and byol model. 
 
-It is intended that you might need some code refactoring if you start adding many different excting stuff :)
+**It is intended that you might need some code refactoring if you start adding many different excting stuff :)**
 
 
-
+## **To-Do**
+- [ ] Image Augmentations porting to Albumentations
+- [ ] Support for other backbone models
