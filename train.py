@@ -63,7 +63,7 @@ def parse_args():
         "--save-disk",
         default=True,
         type=lambda x: True if x.lower() == "true" else False,
-        help="save disk mode when saving pth checkpoints model"
+        help="save disk space when saving pth checkpoints model by having always the best model."
     )
 
     return parser.parse_args()

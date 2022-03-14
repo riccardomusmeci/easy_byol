@@ -42,7 +42,10 @@ def classifier(backbone: str,
             if param.requires_grad:
                 param.requires_grad=False
     print(f"Setting number of classes to predict to {n_classes}.")
-    model.fc = nn.Linear(model.fc.in_features, n_classes)
+    if n_classes == 0:
+        model.fc = nn.Identity(model.fc.in_features, model.fc.in_features)
+    else:
+        model.fc = nn.Linear(model.fc.in_features, n_classes)
     
 
     return model

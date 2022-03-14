@@ -43,13 +43,6 @@ def parse_args():
         help="enable TSNE computation for easier visualization (may take a while). Only for BYOL model."
     )
     
-    parser.add_argument(
-        "--gradcam",
-        default=True,
-        type=lambda x: True if x.lower() == "true" else False,
-        help="enable gradcam images saving. Only for classifier model."
-    )
-
     return parser.parse_args()
 
 if __name__ == "__main__":
